@@ -2,8 +2,10 @@
 import argon2
 import pymongo
 import pymongo.errors
+import pytz
 import random
 import typing
+from bson.codec_options import CodecOptions
 
 from journal.db.dataclasses import User, Entry
 from journal.db.util import IDGenerator
@@ -20,7 +22,8 @@ del token_ranges
 
 class DatabaseInterface:
     def __init__(self, mongo_uri, db_name, worker_id):
-        self.db = pymongo.MongoClient(mongo_uri).get_database(db_name)
+        options = CodecOptions(tz_aware=True, tzinfo=pytz.UTC)
+        self.db = pymongo.MongoClient(mongo_uri).get_database(db_name, codec_options=options)
 
         self.users = self.db.get_collection('users')
         self.users.create_index([('username', pymongo.ASCENDING)], unique=True)
