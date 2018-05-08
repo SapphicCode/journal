@@ -1,3 +1,4 @@
+import datetime
 import functools
 import markdown2
 import requests
@@ -95,7 +96,8 @@ def login():
         user = request.db.get_user(username=username)
         if user:
             if user.check_pw(password):
-                resp.set_cookie('token', request.db.create_token(user))
+                resp.set_cookie('token', request.db.create_token(user),
+                                expires=datetime.datetime.utcnow() + datetime.timedelta(days=365))
                 return resp
             else:
                 return render_template('login.jinja2', **base_data(request), warn='Invalid password. Please try again.')
