@@ -182,7 +182,7 @@ def entry_view(_id):
         return abort(404)
 
     return render_template('app/entry_view.jinja2', **base_data(request),
-                           entry_html=markdown2.markdown(escape(entry.content)), heading=entry.title)
+                           entry_html=markdown2.markdown(escape(entry.content)), entry=entry)
 
 
 @bp.route('/app/entry/<_id>/edit', methods=['GET', 'POST'])

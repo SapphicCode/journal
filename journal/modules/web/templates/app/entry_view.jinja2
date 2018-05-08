@@ -4,7 +4,8 @@
     <a class="btn btn-outline-primary mx-1" href="edit">Edit</a>
     <a class="btn btn-outline-danger mx-1" href="delete">Delete</a>
     <hr class="my-2" />
-    <h1>{{ heading | escape }}</h1>
+    <small class="text-muted">{{ entry.at.strftime('%Y-%m-%d %H:%M:%S %Z') }}</small>
+    <h1>{{ entry.title | escape }}</h1>
     <hr class="my-2" />
     {{ entry_html }}
 {% endblock %}
