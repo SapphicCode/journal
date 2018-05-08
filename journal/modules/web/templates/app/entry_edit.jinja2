@@ -1,0 +1,17 @@
+{% extends "app/container.jinja2" %}
+{% block container %}
+    <!--suppress HtmlUnknownTarget -->
+    <form action="" method="post">
+        <button class="btn btn-outline-primary mx-1" type="submit">Save & View</button>
+        <hr class="my-2" />
+        <div class="form-group">
+            <label for="title">Title</label>
+            <input class="form-control" name="title" id="title" type="text" value="{{ entry.title | escape }}">
+        </div>
+        <div class="form-group">
+            <label for="body">Content</label>
+            <textarea class="form-control" name="body" id="body"
+                      rows="{{ len(entry.content.split('\n')) + 5 }}">{{ entry.content | escape }}</textarea>
+        </div>
+    </form>
+{% endblock %}

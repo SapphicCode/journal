@@ -1,0 +1,21 @@
+body {
+    font-family: var(--body-font);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--title-font);
+}
+
+.centered {
+    margin: auto;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#navbar {
+    height: 100px;
+    width: auto;
+    background-color: #769ddb;
+}

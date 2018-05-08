@@ -1,0 +1,13 @@
+{% extends "main.jinja2" %}
+{% block body %}
+    <div class="container">
+        <nav class="nav nav-tabs my-2">
+            <a class="nav-item nav-link mx-1 {{ active('/app/entries') }}" href="/app/entries">Entries</a>
+
+            <a class="nav-item nav-link mx-1 ml-auto {{ active('/app/settings') }}" href="/app/settings">Settings</a>
+            <a class="nav-item nav-link mx-1 btn-outline-danger" href="/logout">Logout</a>
+        </nav>
+
+        {% block container %}{% endblock %}
+    </div>
+{% endblock %}

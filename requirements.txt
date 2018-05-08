@@ -1,0 +1,9 @@
+jinja2
+markdown2
+requests
+flask
+pytz
+argon2_cffi
+pymongo
+autoslot
+flask>=1.0<2.0
