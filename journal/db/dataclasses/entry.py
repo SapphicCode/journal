@@ -53,7 +53,7 @@ class Entry(Slots):
     def new(self):
         """Initializes the database record if necessary."""
         try:
-            self.db.entries.insert_one({'_id': self.id})
+            self.db.entries.insert_one({'_id': self.id, 'timestamp': self.at})
             return True
         except pymongo.errors.DuplicateKeyError:
             return False

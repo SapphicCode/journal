@@ -67,7 +67,7 @@ class User(Slots):
 
     @property
     def entries(self):
-        for raw_entry in self.db.entries.find({'author_id': self.id}).sort('timestamp', pymongo.ASCENDING):
+        for raw_entry in self.db.entries.find({'author_id': self.id}).sort('timestamp', pymongo.DESCENDING):
             yield Entry(self.db, **raw_entry)
 
     def save_setings(self):
