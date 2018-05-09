@@ -12,6 +12,8 @@
             <label for="body">Content</label>
             <textarea class="form-control" name="body" id="body"
                       rows="{{ len(entry.content.split('\n')) + 5 }}">{{ entry.content | escape }}</textarea>
+            <small class="text-muted">This field supports
+                <a href="https://daringfireball.net/projects/markdown/syntax">markdown</a> (without inline HTML).</small>
         </div>
     </form>
 {% endblock %}
