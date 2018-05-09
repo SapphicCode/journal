@@ -42,8 +42,11 @@ class User(Slots):
         for char in value:
             if char not in 'abcdefghijklmnopqrstuvwxyz0123456789-_.':
                 raise AssertionError('Unable to set username: Illegal characters.')
-        self._username = value
-        self._update(username=self._username)
+        try:
+            self._update(username=self._username)
+            self._username = value
+        except pymongo.errors.DuplicateKeyError:
+            raise AssertionError('Unable to set username: Username is taken.')
 
     @property
     def display_name(self):
