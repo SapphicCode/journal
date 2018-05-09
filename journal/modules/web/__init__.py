@@ -150,6 +150,9 @@ def settings():
             request.user.display_name = request.form.get('display-name')
         if request.form.get('password'):
             request.user.password = request.form.get('password')
+        theme = request.form.get('theme')
+        if theme in ['light', 'dark']:
+            request.user.settings['theme'] = theme
         new_settings = {
             'title_font': request.form.get('title-font'),
             'body_font': request.form.get('body-font'),
