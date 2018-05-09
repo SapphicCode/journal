@@ -165,9 +165,9 @@ def settings():
 
 
 @bp.route('/app/entries/new')
+@login_required
 def entries_new():
-    e = request.db.create_entry()
-    e.author = request.user
+    e = request.db.create_entry(request.user)
     return redirect('/app/entry/{}/edit'.format(e.id), 302)
 
 

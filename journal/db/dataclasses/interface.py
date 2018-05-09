@@ -22,6 +22,7 @@ del token_ranges
 
 class DatabaseInterface:
     def __init__(self, mongo_uri, db_name, worker_id):
+        # noinspection PyArgumentList
         options = CodecOptions(tz_aware=True, tzinfo=pytz.UTC)
         self.db = pymongo.MongoClient(mongo_uri).get_database(db_name, codec_options=options)
 
@@ -86,9 +87,10 @@ class DatabaseInterface:
         res = self.users.update_one({'_id': user.id}, {'$unset': {'tokens': 1}})
         assert res.matched_count == 1, 'User given to invalidate_tokens not found'
 
-    def create_entry(self) -> Entry:
+    def create_entry(self, user: User) -> Entry:
         e = Entry(self, _id=self.id_gen.generate())
         assert e.new(), 'Entry ID generated already exists in the database.'
+        e.author = user
         return e
 
     def get_entry(self, _id) -> typing.Optional[Entry]:
