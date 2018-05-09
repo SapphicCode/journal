@@ -4,8 +4,8 @@
     <hr class="my-2" />
     <ul class="list-group">
         {% for entry in entries %}
-            <li class="list-group-item my-1">
-                <div class="float-right">
+            <li class="list-group-item">
+                <div class="float-right ml-2">
                     <a class="btn btn-outline-primary mx-1" href="entry/{{ entry.id }}/edit">Edit</a>
                     <a class="btn btn-outline-danger ml-1" href="entry/{{ entry.id }}/delete">Delete</a>
                 </div>
