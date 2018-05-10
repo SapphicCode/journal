@@ -16,6 +16,7 @@ class User(Slots):
         display_backup = self._username.replace('-', ' ').replace('_', ' ').replace('.', ' ').title()
         self._display_name = data.get('display_name', display_backup)
         self.tokens = data.get('tokens', [])
+        self.flags = data.get('flags', [])
         self.settings = data.get('settings', {})
 
     def __repr__(self):
@@ -75,6 +76,9 @@ class User(Slots):
 
     def save_setings(self):
         assert self._update(settings=self.settings).matched_count == 1
+
+    def save_flags(self):
+        assert self._update(flags=self.flags).matched_count == 1
 
     def delete(self):
         self.db.users.delete_one({'_id': self.id})

@@ -1,0 +1,15 @@
+{% extends "app/container.jinja2" %}
+{% block container %}
+    <h1>Statistics</h1>
+
+    <ul class="list-group">
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            Entries stored
+            <span class="badge badge-primary badge-pill">{{ request.db.entries.count() }}</span>
+        </li>
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            Users registered
+            <span class="badge badge-primary badge-pill">{{ request.db.users.count() }}</span>
+        </li>
+    </ul>
+{% endblock %}

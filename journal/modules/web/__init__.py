@@ -185,6 +185,11 @@ def not_found(_):
     return render_template('app/404.jinja2', **base_data(request))
 
 
+@bp.errorhandler(403)
+def forbidden(_):
+    return render_template('app/403.jinja2', **base_data(request))
+
+
 @bp.route('/app/entry/<_id>/view')
 @login_required
 def entry_view(_id):
@@ -236,3 +241,11 @@ def entry_delete(_id):
         return redirect('/app/entries', 302)
 
     return render_template('app/entry_delete.jinja2', **base_data(request), entry=entry)
+
+
+@bp.route('/app/admin')
+@login_required
+def admin():
+    if 'admin' not in request.user.flags:
+        return abort(403)
+    return render_template('app/admin.jinja2', **base_data(request))

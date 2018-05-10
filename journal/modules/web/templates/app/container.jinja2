@@ -4,7 +4,11 @@
         <nav class="nav nav-tabs my-2">
             <a class="nav-item nav-link mx-1 {{ active('/app/entries') }}" href="/app/entries">Entries</a>
 
-            <a class="nav-item nav-link mx-1 ml-auto {{ active('/app/settings') }}" href="/app/settings">Settings</a>
+            <div class="ml-auto"></div>
+            {% if 'admin' in request.user.flags %}
+                <a class="nav-item nav-link mx-1 {{ active('/app/admin') }}" href="/app/admin">Admin</a>
+            {% endif %}
+            <a class="nav-item nav-link mx-1 {{ active('/app/settings') }}" href="/app/settings">Settings</a>
             <a class="nav-item nav-link mx-1 btn-outline-danger" href="/logout">Logout</a>
         </nav>
 
