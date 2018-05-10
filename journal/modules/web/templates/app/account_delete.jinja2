@@ -1,0 +1,9 @@
+{% extends "app/container.jinja2" %}
+{% block container %}
+    <h3>Are you absolutely sure that you wish to delete your account?</h3>
+    <p>Account deletion means that <i>all</i> of your data will be irrecoverably deleted from the service at once.</p>
+    <form action="" method="post">
+        <a class="btn btn-outline-primary mx-1" href="/app/entries">No, maybe not...</a>
+        <button type="submit" class="btn btn-danger mx-1">Delete it.</button>
+    </form>
+{% endblock %}

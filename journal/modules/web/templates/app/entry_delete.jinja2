@@ -1,11 +1,8 @@
 {% extends "app/container.jinja2" %}
 {% block container %}
-    <!--suppress HtmlUnknownTarget -->
-    <div class="align-center">
-        <form action="" method="post">
-            <h2>Are you sure that you wish to delete "{{ entry.title | escape }}"?</h2>
-            <a class="btn btn-outline-primary mx-1" href="/app/entries">No, get me out of here!</a>
-            <button type="submit" class="btn btn-danger mx-1">Delete it.</button>
-        </form>
-    </div>
+    <h3>Are you sure that you wish to delete "{{ entry.title | escape }}"?</h3>
+    <form action="" method="post">
+        <a class="btn btn-outline-primary mx-1" href="/app/entries">No, get me out of here!</a>
+        <button type="submit" class="btn btn-danger mx-1">Delete it.</button>
+    </form>
 {% endblock %}

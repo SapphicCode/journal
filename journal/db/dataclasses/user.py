@@ -43,7 +43,7 @@ class User(Slots):
             if char not in 'abcdefghijklmnopqrstuvwxyz0123456789-_.':
                 raise AssertionError('Unable to set username: Illegal characters.')
         try:
-            self._update(username=self._username)
+            self._update(username=value)
             self._username = value
         except pymongo.errors.DuplicateKeyError:
             raise AssertionError('Unable to set username: Username is taken.')
@@ -74,7 +74,7 @@ class User(Slots):
             yield Entry(self.db, **raw_entry)
 
     def save_setings(self):
-        self._update(settings=self.settings)
+        assert self._update(settings=self.settings).matched_count == 1
 
     def delete(self):
         self.db.users.delete_one({'_id': self.id})

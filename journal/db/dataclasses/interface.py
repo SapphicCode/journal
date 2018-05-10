@@ -38,16 +38,10 @@ class DatabaseInterface:
         self.id_gen = IDGenerator(int(worker_id))
 
     def create_user(self, username: str, password: str) -> typing.Optional[User]:
-        new_struct = {
-            '_id': self.id_gen.generate(),
-        }
+        _id = self.id_gen.generate()
+        self.users.insert_one({'_id': _id})
 
-        try:
-            self.users.insert_one(new_struct)
-        except pymongo.errors.DuplicateKeyError:
-            return
-
-        new = self.get_user(id=new_struct['_id'])
+        new = self.get_user(id=_id)
         new.password = password
         del password  # *shudder*
         try:
@@ -56,7 +50,7 @@ class DatabaseInterface:
             new.delete()
             raise e
 
-        return self.get_user(username=username)
+        return new
 
     # noinspection PyShadowingBuiltins
     def get_user(self, *, id=None, username=None, email=None, token=None) -> typing.Optional[User]:

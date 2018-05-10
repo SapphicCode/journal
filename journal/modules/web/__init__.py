@@ -164,6 +164,15 @@ def settings():
     return render_template('app/settings.jinja2', **base_data(request), settings=request.user.settings)
 
 
+@bp.route('/app/settings/delete-account', methods=['GET', 'POST'])
+@login_required
+def account_delete():
+    if request.method == 'POST':
+        request.user.delete()
+        return redirect('/', 302)
+    return render_template('app/account_delete.jinja2', **base_data(request))
+
+
 @bp.route('/app/entries/new')
 @login_required
 def entries_new():
