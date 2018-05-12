@@ -20,7 +20,7 @@ class Entry(Slots):
         self.tags = data.get('tags', [])
 
     def _update(self, **fields) -> pymongo.results.UpdateResult:
-        return self.db.users.update_one({'_id': self.id}, {'$set': fields})
+        return self.db.entries.update_one({'_id': self.id}, {'$set': fields})
 
     @property
     def author_id(self):
@@ -29,7 +29,7 @@ class Entry(Slots):
     @author_id.setter
     def author_id(self, value):
         self._author_id = value
-        assert self._update(author_id=self.author_id)
+        assert self._update(author_id=self.author_id).matched_count == 1
 
     @property
     def author(self):
@@ -68,7 +68,7 @@ class Entry(Slots):
     @timestamp.setter
     def timestamp(self, value):
         self._timestamp = value
-        assert self._update(timestamp=value, timezone=str(value.tzinfo or pytz.UTC))
+        assert self._update(timestamp=value, timezone=str(value.tzinfo or pytz.UTC)).matched_count == 1
 
     def new(self):
         """Initializes the database record if necessary."""
