@@ -3,7 +3,9 @@
     <!--suppress HtmlUnknownTarget -->
     <form action="" method="post">
         <button class="btn btn-outline-primary mx-1" type="submit">Save & View</button>
+        <!-- TODO: fix hr on bootstrap solar -->
         <hr class="my-2" />
+        <!-- TODO: allow timezone to be set -->
         <div class="form-group">
             <label for="title">Title</label>
             <input class="form-control" name="title" id="title" type="text" value="{{ entry.title | escape }}">
@@ -11,9 +13,10 @@
         <div class="form-group">
             <label for="body">Content</label>
             <textarea class="form-control" name="body" id="body"
-                      rows="{{ len(entry.content.split('\n')) + 5 }}">{{ entry.content | escape }}</textarea>
+                      rows="{{ len(entry.content) / 100 }}">{{ entry.content | escape }}</textarea>
             <small class="text-muted">This field supports
                 <a href="https://daringfireball.net/projects/markdown/syntax">markdown</a> (without inline HTML).</small>
         </div>
+        <!-- TODO: Form CSRF with JWT (user ID & 24 hour time tolerance) -->
     </form>
 {% endblock %}
