@@ -2,6 +2,7 @@ import argon2
 import pymongo
 import pymongo.errors
 import pymongo.results
+import pytz
 from autoslot import Slots
 
 from .entry import Entry
@@ -17,6 +18,7 @@ class User(Slots):
         self._display_name = data.get('display_name', display_backup)
         self.tokens = data.get('tokens', [])
         self.flags = data.get('flags', [])
+        self._timezone = pytz.timezone(data.get('timezone', 'UTC'))
         self.settings = data.get('settings', {})
 
     def __repr__(self):
@@ -64,10 +66,19 @@ class User(Slots):
 
     @password.setter
     def password(self, value):
-        password = self.db.argon2.hash(value)  # get that thing out of memory ASAP
-        del value
+        password = self.db.argon2.hash(value)
+        del value  # get that thing out of memory ASAP
         self._pw_hash = password
         assert self._update(password=password).matched_count == 1
+
+    @property
+    def timezone(self):
+        return self._timezone
+
+    @timezone.setter
+    def timezone(self, value):
+        self._timezone = value
+        assert self._update(timezone=str(value)).matched_count == 1
 
     @property
     def entries(self):

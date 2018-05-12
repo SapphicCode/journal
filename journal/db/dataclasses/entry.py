@@ -1,5 +1,6 @@
 import pymongo
 import pymongo.errors
+import pytz
 from autoslot import Slots
 
 from journal.db.util import id_to_time
@@ -9,7 +10,9 @@ class Entry(Slots):
     def __init__(self, db: 'DatabaseInterface' = None, **data):
         self.db = db
         self.id = data.get('_id')
-        self.at = data.get('timestamp', id_to_time(self.id))
+        self._timestamp = data.get('timestamp', id_to_time(self.id)).astimezone(
+            pytz.timezone(data.get('timezone', 'UTC'))
+        )
         self._author_id = data.get('author_id')
         self._title = data.get('title', 'Untitled entry')
         self._content = data.get('content', '')
@@ -36,6 +39,12 @@ class Entry(Slots):
     def title(self):
         return self._title
 
+    @property
+
+    @property
+    def timestamp_human(self):
+        return self._timestamp.strftime('%Y-%m-%d %H:%M:%S %Z')
+
     @title.setter
     def title(self, value):
         self._title = value.strip()
@@ -53,7 +62,7 @@ class Entry(Slots):
     def new(self):
         """Initializes the database record if necessary."""
         try:
-            self.db.entries.insert_one({'_id': self.id, 'timestamp': self.at})
+            self.db.entries.insert_one({'_id': self.id, 'timestamp': self._timestamp})
             return True
         except pymongo.errors.DuplicateKeyError:
             return False

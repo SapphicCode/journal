@@ -11,7 +11,7 @@
                         <a class="btn btn-outline-danger ml-1" href="entry/{{ entry.id }}/delete">Delete</a>
                     </div>
                     <a href="entry/{{ entry.id }}/view">{{ entry.title | escape }}</a><br>
-                    <small class="text-muted">{{ entry.at.strftime('%Y-%m-%d %H:%M:%S %Z') }}</small>
+                    <small class="text-muted">{{ entry.timestamp_human }}</small>
                 </li>
             {% endfor %}
         </ul>

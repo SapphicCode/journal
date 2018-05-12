@@ -82,7 +82,7 @@ class DatabaseInterface:
         assert res.matched_count == 1, 'User given to invalidate_tokens not found'
 
     def create_entry(self, user: User) -> Entry:
-        e = Entry(self, _id=self.id_gen.generate())
+        e = Entry(self, _id=self.id_gen.generate(), timezone=str(user.timezone))
         assert e.new(), 'Entry ID generated already exists in the database.'
         e.author = user
         return e
@@ -105,7 +105,7 @@ class DatabaseInterface:
             {'_id': entry.id},
             {'$set': {
                 'author_id': entry.author_id,
-                'timestamp': entry.at,
+                'timestamp': entry._timestamp,
                 'title': entry.title,
                 'content': entry.content,
                 'tags': entry.tags,
