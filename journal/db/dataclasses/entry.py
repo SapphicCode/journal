@@ -63,12 +63,20 @@ class Entry(Slots):
         self._content = value.strip()
         assert self._update(content=self._content).matched_count == 1
 
+    @property
+    def timestamp(self):
+        return self._timestamp
+
+    @timestamp.setter
+    def timestamp(self, value):
+        self._timestamp = value
+        assert self._update(timestamp=value, timezone=str(value.tzinfo or pytz.UTC))
+
     def new(self):
         """Initializes the database record if necessary."""
         try:
-            self.db.entries.insert_one({
-                '_id': self.id, 'timestamp': self._timestamp, 'timezone': str(self._timestamp.tzinfo),
-            })
+            self.db.entries.insert_one({'_id': self.id})
+            self.timestamp = self._timestamp
             return True
         except pymongo.errors.DuplicateKeyError:
             return False
