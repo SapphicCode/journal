@@ -1,5 +1,6 @@
 import pymongo
 import pymongo.errors
+import pymongo.results
 import pytz
 from autoslot import Slots
 
@@ -18,6 +19,9 @@ class Entry(Slots):
         self._content = data.get('content', '')
         self.tags = data.get('tags', [])
 
+    def _update(self, **fields) -> pymongo.results.UpdateResult:
+        return self.db.users.update_one({'_id': self.id}, {'$set': fields})
+
     @property
     def author_id(self):
         return self._author_id
@@ -25,7 +29,7 @@ class Entry(Slots):
     @author_id.setter
     def author_id(self, value):
         self._author_id = value
-        self.db.entries.update_one({'_id': self.id}, {'$set': {'author_id': self._author_id}})
+        assert self._update(author_id=self.author_id)
 
     @property
     def author(self):
@@ -48,7 +52,7 @@ class Entry(Slots):
     @title.setter
     def title(self, value):
         self._title = value.strip()
-        self.db.entries.update_one({'_id': self.id}, {'$set': {'title': self._title}})
+        assert self._update(title=self._title).matched_count == 1
 
     @property
     def content(self):
@@ -57,12 +61,14 @@ class Entry(Slots):
     @content.setter
     def content(self, value):
         self._content = value.strip()
-        self.db.entries.update_one({'_id': self.id}, {'$set': {'content': self._content}})
+        assert self._update(content=self._content).matched_count == 1
 
     def new(self):
         """Initializes the database record if necessary."""
         try:
-            self.db.entries.insert_one({'_id': self.id, 'timestamp': self._timestamp})
+            self.db.entries.insert_one({
+                '_id': self.id, 'timestamp': self._timestamp, 'timezone': str(self._timestamp.tzinfo),
+            })
             return True
         except pymongo.errors.DuplicateKeyError:
             return False
