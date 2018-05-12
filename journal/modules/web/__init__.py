@@ -1,9 +1,9 @@
 import datetime
 import functools
 import markdown2
+import pytz
 import requests
 import typing
-import pytz
 from flask import Blueprint, render_template, request, Request, redirect, abort
 from jinja2 import escape
 
@@ -29,7 +29,7 @@ def active(request: Request, page):
 
 
 def base_data(request: ExtendedRequest, **additional):
-    data = {'request': request, 'active': lambda page: active(request, page), 'len': len}
+    data = {'request': request, 'active': lambda page: active(request, page), 'b': __builtins__}
     data.update(additional)
 
     data['fonts'] = {}
