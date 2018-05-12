@@ -3,6 +3,7 @@ import functools
 import markdown2
 import requests
 import typing
+import pytz
 from flask import Blueprint, render_template, request, Request, redirect, abort
 from jinja2 import escape
 
@@ -139,29 +140,38 @@ def entries():
 @bp.route('/app/settings', methods=['GET', 'POST'])
 @login_required
 def settings():
+    data = base_data(request, timezones=pytz.common_timezones)
     if request.method == 'POST':
         warn = ''
-        if request.form.get('username'):
+        uname = request.form.get('username')
+        if uname:
             try:
-                request.user.username = request.form.get('username')
+                request.user.username = uname
             except AssertionError as e:
                 warn += str(e) + '\n'
-        if request.form.get('display-name'):
-            request.user.display_name = request.form.get('display-name')
+        dname = request.form.get('display-name')
+        if dname:
+            request.user.display_name = dname
         if request.form.get('password'):
             request.user.password = request.form.get('password')
         theme = request.form.get('theme')
         if theme in ['light', 'dark']:
             request.user.settings['theme'] = theme
+        tz = request.form.get('timezone')
+        if tz:
+            try:
+                request.user.timezone = pytz.timezone(tz)
+            except pytz.UnknownTimeZoneError:
+                warn += 'Unknown time zone selected. What are you playing at?\n'
         new_settings = {
             'title_font': request.form.get('title-font'),
             'body_font': request.form.get('body-font'),
         }
         request.user.settings.update(new_settings)
         request.user.save_setings()
-        return render_template('app/settings.jinja2', **base_data(request), settings=request.user.settings,
+        return render_template('app/settings.jinja2', **data, settings=request.user.settings,
                                notice='Settings saved.', warn=warn.strip())
-    return render_template('app/settings.jinja2', **base_data(request), settings=request.user.settings)
+    return render_template('app/settings.jinja2', **data, settings=request.user.settings)
 
 
 @bp.route('/app/settings/delete-account', methods=['GET', 'POST'])
