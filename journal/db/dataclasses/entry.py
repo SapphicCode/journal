@@ -44,8 +44,6 @@ class Entry(Slots):
         return self._title
 
     @property
-
-    @property
     def timestamp_human(self):
         return self._timestamp.strftime('%Y-%m-%d %H:%M:%S %Z')
 
