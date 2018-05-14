@@ -92,26 +92,3 @@ class DatabaseInterface:
         if entry is None:
             return
         return Entry(self, **entry)
-
-    def get_entries_by(self, user_id: int, skip=0, limit=50) -> typing.Iterable[Entry]:
-        return [
-            Entry(self, **x)
-            for x in
-            self.entries.find({'author_id': user_id}).sort('timestamp', pymongo.DESCENDING).skip(skip).limit(limit)
-        ]
-
-    def update_entry(self, entry: Entry):
-        self.entries.update_one(
-            {'_id': entry.id},
-            {'$set': {
-                'author_id': entry.author_id,
-                'timestamp': entry._timestamp,
-                'title': entry.title,
-                'content': entry.content,
-                'tags': entry._tags,
-            }},
-            upsert=True,
-        )
-
-    def delete_entry(self, entry: Entry):
-        self.entries.delete_one({'_id': entry.id})
