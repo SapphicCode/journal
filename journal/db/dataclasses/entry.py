@@ -78,7 +78,7 @@ class Entry(Slots):
 
     @tags.setter
     def tags(self, value):
-        cleaned = [x.strip().lower() for x in value if x.strip()]
+        cleaned = sorted(x.strip().lower() for x in value if x.strip())
         self._tags = cleaned
         self._update(tags=self._tags)
 
