@@ -1,6 +1,9 @@
 {% extends "app/container.jinja2" %}
 {% block container %}
     <a class="btn btn-outline-primary mx-1" href="entries/new">New Entry</a>
+    {% if filter %}
+        <a class="btn btn-outline-secondary mx-1" href="entries">Clear <code>{{ filter | escape }}</code> tag filter</a>
+    {% endif %}
     <hr class="my-2"/>
     {% if entries %}
         <ul class="list-group mb-5">

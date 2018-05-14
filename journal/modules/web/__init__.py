@@ -134,8 +134,11 @@ def app():
 @bp.route('/app/entries')
 @login_required
 def entries():
+    tag = request.args.get('tag')
+    if tag:
+        tag = tag.strip().lower()
     return render_template('app/entries.jinja2', **base_data(request),
-                           entries=request.user.entries(request.args.get('tag')))
+                           entries=request.user.entries(tag), filter=tag)
 
 
 @bp.route('/app/settings', methods=['GET', 'POST'])
