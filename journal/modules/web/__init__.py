@@ -9,7 +9,8 @@ from jinja2 import escape
 
 from journal.db import DatabaseInterface, User
 
-bp = Blueprint('web', __name__, url_prefix='', static_folder='static', template_folder='templates')
+bp = Blueprint('web', __name__, url_prefix='', static_folder='static', static_url_path='/static',
+               template_folder='templates')
 session = requests.Session()
 
 
@@ -64,11 +65,6 @@ def login_required(f):
             return redirect('/logout', 302)
         return f(*args, **kwargs)
     return decorated
-
-
-@bp.route('/static/style.css')
-def style():
-    return bp.send_static_file('style.css')
 
 
 @bp.route('/login', methods=['GET', 'POST'])
