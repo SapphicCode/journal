@@ -15,12 +15,14 @@ class Entry(Slots):
             pytz.timezone(data.get('timezone', 'UTC'))
         )
         self._author_id = data.get('author_id')
-        self._title = data.get('title', 'Untitled entry')
+        self._title = data.get('title', '')
         self._content = data.get('content', '')
-        self.tags = data.get('tags', [])
+        self._tags = data.get('tags', [])
 
     def _update(self, **fields) -> pymongo.results.UpdateResult:
-        return self.db.entries.update_one({'_id': self.id}, {'$set': fields})
+        res = self.db.entries.update_one({'_id': self.id}, {'$set': fields})
+        assert res.matched_count == 1
+        return res
 
     @property
     def author_id(self):
@@ -29,7 +31,7 @@ class Entry(Slots):
     @author_id.setter
     def author_id(self, value):
         self._author_id = value
-        assert self._update(author_id=self.author_id).matched_count == 1
+        self._update(author_id=self.author_id)
 
     @property
     def author(self):
@@ -41,7 +43,7 @@ class Entry(Slots):
 
     @property
     def title(self):
-        return self._title
+        return self._title if self._title else 'Untitled entry'
 
     @property
     def timestamp_human(self):
@@ -50,7 +52,7 @@ class Entry(Slots):
     @title.setter
     def title(self, value):
         self._title = value.strip()
-        assert self._update(title=self._title).matched_count == 1
+        self._update(title=self._title)
 
     @property
     def content(self):
@@ -59,7 +61,7 @@ class Entry(Slots):
     @content.setter
     def content(self, value):
         self._content = value.strip()
-        assert self._update(content=self._content).matched_count == 1
+        self._update(content=self._content)
 
     @property
     def timestamp(self):
@@ -68,7 +70,21 @@ class Entry(Slots):
     @timestamp.setter
     def timestamp(self, value):
         self._timestamp = value
-        assert self._update(timestamp=value, timezone=str(value.tzinfo or pytz.UTC)).matched_count == 1
+        self._update(timestamp=value, timezone=str(value.tzinfo or pytz.UTC))
+
+    @property
+    def tags(self):
+        return self._tags
+
+    @tags.setter
+    def tags(self, value):
+        cleaned = [x.strip().lower() for x in value if x.strip()]
+        self._tags = cleaned
+        self._update(tags=self._tags)
+
+    @property
+    def tags_human(self):
+        return ', '.join(self._tags)
 
     def new(self):
         """Initializes the database record if necessary."""
@@ -82,7 +98,7 @@ class Entry(Slots):
     def delete(self):
         """Clears the database record"""
         res = self.db.entries.delete_one({'_id': self.id})
-        return res.deleted_count == 1
+        assert res.deleted_count == 1
 
     def __repr__(self):
         return '<Entry id={0.id!r} author_id={0.author_id!r} title={0.title!r}>'.format(self)

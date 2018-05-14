@@ -134,7 +134,8 @@ def app():
 @bp.route('/app/entries')
 @login_required
 def entries():
-    return render_template('app/entries.jinja2', **base_data(request), entries=list(request.user.entries))
+    return render_template('app/entries.jinja2', **base_data(request),
+                           entries=request.user.entries(request.args.get('tag')))
 
 
 @bp.route('/app/settings', methods=['GET', 'POST'])
@@ -225,12 +226,9 @@ def entry_edit(_id):
         return abort(404)
 
     if request.method == 'POST':
-        new_title = request.form.get('title')
-        if new_title:
-            entry.title = new_title
-        new_body = request.form.get('body')
-        if new_body:
-            entry.content = new_body
+        entry.title = request.form.get('title', '')
+        entry.content = request.form.get('body', '')
+        entry.tags = request.form.get('tags', '').split(',')
         return redirect('/app/entry/{}/view'.format(_id), 302)
 
     return render_template('app/entry_edit.jinja2', **base_data(request), entry=entry)

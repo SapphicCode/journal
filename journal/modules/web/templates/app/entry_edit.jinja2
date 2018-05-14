@@ -17,6 +17,11 @@
             <small class="text-muted">This field supports
                 <a href="https://daringfireball.net/projects/markdown/syntax">markdown</a> (without inline HTML).</small>
         </div>
+        <div class="form-group">
+            <label for="tags">Tags</label>
+            <input class="form-control" name="tags" id="tags" type="text" value="{{ entry.tags_human | escape }}">
+            <small class="text-muted">A comma-separated list of tags to tag this entry with.</small>
+        </div>
         <!-- TODO: Form CSRF with JWT (user ID & 24 hour time tolerance) -->
     </form>
 {% endblock %}

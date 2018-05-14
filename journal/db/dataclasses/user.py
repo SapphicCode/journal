@@ -32,7 +32,9 @@ class User(Slots):
             return False
 
     def _update(self, **fields) -> pymongo.results.UpdateResult:
-        return self.db.users.update_one({'_id': self.id}, {'$set': fields})
+        res = self.db.users.update_one({'_id': self.id}, {'$set': fields})
+        assert res.matched_count == 1
+        return res
 
     @property
     def username(self):
@@ -58,7 +60,7 @@ class User(Slots):
     @display_name.setter
     def display_name(self, value):
         self._display_name = value
-        assert self._update(display_name=self._display_name).matched_count == 1
+        self._update(display_name=self._display_name)
 
     @property
     def password(self):
@@ -69,7 +71,7 @@ class User(Slots):
         password = self.db.argon2.hash(value)
         del value  # get that thing out of memory ASAP
         self._pw_hash = password
-        assert self._update(password=password).matched_count == 1
+        self._update(password=password)
 
     @property
     def timezone(self):
@@ -78,18 +80,24 @@ class User(Slots):
     @timezone.setter
     def timezone(self, value):
         self._timezone = value
-        assert self._update(timezone=str(value)).matched_count == 1
+        self._update(timezone=str(value))
 
-    @property
-    def entries(self):
-        for raw_entry in self.db.entries.find({'author_id': self.id}).sort('timestamp', pymongo.DESCENDING):
+    def entries(self, tag=None):
+        if tag:
+            cursor = self.db.entries.find({'author_id': self.id, 'tags': tag.lower()})
+        else:
+            cursor = self.db.entries.find({'author_id': self.id})
+
+        cursor = cursor.sort('timestamp', pymongo.DESCENDING)
+
+        for raw_entry in cursor:
             yield Entry(self.db, **raw_entry)
 
     def save_setings(self):
-        assert self._update(settings=self.settings).matched_count == 1
+        self._update(settings=self.settings)
 
     def save_flags(self):
-        assert self._update(flags=self.flags).matched_count == 1
+        self._update(flags=self.flags)
 
     def delete(self):
         self.db.users.delete_one({'_id': self.id})

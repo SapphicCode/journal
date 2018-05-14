@@ -108,7 +108,7 @@ class DatabaseInterface:
                 'timestamp': entry._timestamp,
                 'title': entry.title,
                 'content': entry.content,
-                'tags': entry.tags,
+                'tags': entry._tags,
             }},
             upsert=True,
         )
