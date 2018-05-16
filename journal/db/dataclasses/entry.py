@@ -2,9 +2,13 @@ import pymongo
 import pymongo.errors
 import pymongo.results
 import pytz
+import typing
 from autoslot import Slots
 
 from journal.db.util import id_to_time
+
+if typing.TYPE_CHECKING:
+    from journal.db import DatabaseInterface, User
 
 
 class Entry(Slots):
