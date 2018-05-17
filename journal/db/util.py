@@ -1,6 +1,7 @@
 import time
 
 import datetime
+import jwt
 import pytz
 from threading import RLock
 
@@ -54,3 +55,16 @@ class IDGenerator:
         # 12 - 0: counter
 
         return now_ms << 22 | self.worker_id << 10 | self.counter
+
+
+class JWTEncoder:
+    def __init__(self, signing_key):
+        self.key = signing_key
+
+    def encode(self, **data) -> str:
+        if 'iat' not in data:
+            data['iat'] = datetime.datetime.now().astimezone(pytz.UTC)
+        return jwt.encode(data, self.key, 'HS256').decode()
+
+    def decode(self, data: str, **kwargs) -> dict:
+        return jwt.decode(data, self.key, algorithms=['HS256'], **kwargs)

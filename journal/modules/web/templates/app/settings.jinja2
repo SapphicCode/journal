@@ -1,77 +1,82 @@
 {% extends "app/container.jinja2" %}
 {% block container %}
     <form action="" method="post">
+        <button type="submit" class="btn btn-outline-primary mx-1">Save</button>
+        {% if notice %}
+            <div class="alert alert-info my-2">{{ notice }}</div>
+        {% endif %}
+        {% if warn %}
+            <div class="alert alert-warning my-2">{{ warn }}</div>
+        {% endif %}
+        <hr class="my-2"/>
 
-    <button type="submit" class="btn btn-outline-primary mx-1">Save</button>
-    {% if notice %}
-        <div class="alert alert-info my-2">{{ notice }}</div>
-    {% endif %}
-    {% if warn %}
-        <div class="alert alert-warning my-2">{{ warn }}</div>
-    {% endif %}
-    <hr class="my-2" />
+        <h2>User Info</h2>
 
-    <h2>User Info</h2>
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input id="username" name="username" type="text" class="form-control" value="{{ request.user.username }}">
+            <small class="text-muted">
+                This is the name you use to log in. Usually you don't want to change this.
+                It can consist of lowercase alphanumerics, <code>_</code>, <code>-</code> and <code>.</code>.
+            </small>
+        </div>
 
-    <div class="form-group">
-        <label for="username">Username</label>
-        <input id="username" name="username" type="text" class="form-control" value="{{ request.user.username }}">
-        <small class="text-muted">
-            This is the name you use to log in. Usually you don't want to change this.
-            It can consist of lowercase alphanumerics, <code>_</code>, <code>-</code> and <code>.</code>.
-        </small>
-    </div>
+        <div class="form-group">
+            <label for="display-name">Display Name</label>
+            <input id="display-name" name="display-name" type="text" class="form-control"
+                   value="{{ request.user.display_name }}">
+            <small class="text-muted">This is the name the service uses to refer to you, for instance in the page
+                title.
+            </small>
+        </div>
 
-    <div class="form-group">
-        <label for="display-name">Display Name</label>
-        <input id="display-name" name="display-name" type="text" class="form-control" value="{{ request.user.display_name }}">
-        <small class="text-muted">This is the name the service uses to refer to you, for instance in the page title.</small>
-    </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" class="form-control">
+            <small class="text-muted">If you want to change your password, fill in this field.</small>
+        </div>
 
-    <div class="form-group">
-        <label for="password">Password</label>
-        <input id="password" name="password" type="password" class="form-control">
-        <small class="text-muted">If you want to change your password, fill in this field.</small>
-    </div>
+        <div class="form-group">
+            <label for="timezone">Timezone</label>
+            <select id="timezone" name="timezone" class="form-control">
+                <option selected>{{ request.user.timezone }}</option>
+                <option></option>
+                {% for timezone in timezones %}
+                    <option>{{ timezone }}</option>
+                {% endfor %}
+            </select>
+            <small class="text-muted">This is the timezone used to create future entries.</small>
+        </div>
 
-    <div class="form-group">
-        <label for="timezone">Timezone</label>
-        <select id="timezone" name="timezone" class="form-control">
-            <option selected>{{ request.user.timezone }}</option>
-            <option></option>
-            {% for timezone in timezones %}
-                <option>{{ timezone }}</option>
-            {% endfor %}
-        </select>
-        <small class="text-muted">This is the timezone used to create future entries.</small>
-    </div>
+        <label>Account deletion (aka GDPR compliance)</label><br>
+        <a href="settings/delete-account" class="btn btn-outline-danger mb-2">Delete my account</a>
 
-    <label>Account deletion (aka GDPR compliance)</label><br>
-    <a href="settings/delete-account" class="btn btn-outline-danger mb-2">Delete my account</a>
+        <h2>UI</h2>
 
-    <h2>UI</h2>
+        <h3>Theme</h3>
 
-    <h3>Theme</h3>
+        <div class="form-group">
+            <input id="theme-light" name="theme" type="radio"
+                   value="light" {{ 'checked' if settings.get('theme') == 'light' or not settings.get('theme') }}>
+            <label for="theme-light">Light</label><br>
+            <input id="theme-dark" name="theme" type="radio"
+                   value="dark" {{ 'checked' if settings.get('theme') == 'dark' }}>
+            <label for="theme-dark">Dark</label>
+        </div>
 
-    <div class="form-group">
-        <input id="theme-light" name="theme" type="radio" value="light" {{ 'checked' if settings.get('theme') == 'light' or not settings.get('theme') }}>
-        <label for="theme-light">Light</label><br>
-        <input id="theme-dark" name="theme" type="radio" value="dark" {{ 'checked' if settings.get('theme') == 'dark' }}>
-        <label for="theme-dark">Dark</label>
-    </div>
+        <h3>Fonts</h3>
 
-    <h3>Fonts</h3>
+        <small class="text-muted">Any font on <a href="https://fonts.google.com">Google Fonts</a> is supported.</small>
+        <div class="form-group">
+            <label for="title-font">Titles</label>
+            <input id="title-font" name="title-font" type="text" class="form-control" value="{{ fonts['title'] }}">
+        </div>
 
-    <small class="text-muted">Any font on <a href="https://fonts.google.com">Google Fonts</a> is supported.</small>
-    <div class="form-group">
-        <label for="title-font">Titles</label>
-        <input id="title-font" name="title-font" type="text" class="form-control" value="{{ fonts['title'] }}">
-    </div>
+        <div class="form-group">
+            <label for="body-font">Body</label>
+            <input id="body-font" name="body-font" type="text" class="form-control" value="{{ fonts['body'] }}">
+        </div>
 
-    <div class="form-group">
-        <label for="body-font">Body</label>
-        <input id="body-font" name="body-font" type="text" class="form-control" value="{{ fonts['body'] }}">
-    </div>
-
+        {% include 'csrf.jinja2' %}
     </form>
 {% endblock %}

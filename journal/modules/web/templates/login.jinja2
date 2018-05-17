@@ -23,9 +23,11 @@
         </div>
         <div id="submit"><br><button class="btn btn-primary" type="submit">Submit</button><br></div>
         <small class="text-muted">By logging in you agree to the privacy policy.</small>
+        {% include 'csrf.jinja2' %}
     </form>
+    <!--suppress JSUnusedLocalSymbols -->
     <script>
-        var btn = document.getElementById("submit");
+        let btn = document.getElementById("submit");
         btn.style.display = 'none';
         function submit_form() {
             btn.children[1].click();

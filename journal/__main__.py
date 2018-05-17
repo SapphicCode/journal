@@ -14,9 +14,11 @@ mongodb_uri = cfg.get('main', 'mongodb_uri')
 mongodb_db = cfg.get('main', 'mongodb_db')
 
 idgen_worker_id = cfg.getint('main', 'idgen_worker_id')
+secret_key = cfg.get('main', 'secret_key')
 
 app = journal.create_app(
-    recaptcha=recaptcha, mongodb_uri=mongodb_uri, mongodb_db=mongodb_db, idgen_worker_id=idgen_worker_id
+    recaptcha=recaptcha, mongodb_uri=mongodb_uri, mongodb_db=mongodb_db, idgen_worker_id=idgen_worker_id,
+    secret_key=secret_key,
 )
 
 app.debug = True

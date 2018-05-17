@@ -1,6 +1,7 @@
 from flask import Flask, request
 
 from journal.db import DatabaseInterface
+from journal.db.util import JWTEncoder
 from journal.modules import web
 
 
@@ -12,6 +13,7 @@ def create_app(**settings) -> Flask:
 
     @app.before_request
     def setup():
+        request.signer = JWTEncoder(settings['secret_key'])
         request.db = db
         request.recaptcha = settings['recaptcha']
         return

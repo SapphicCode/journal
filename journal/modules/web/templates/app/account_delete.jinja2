@@ -5,5 +5,6 @@
     <form action="" method="post">
         <a class="btn btn-outline-primary mx-1" href="/app/entries">No, maybe not...</a>
         <button type="submit" class="btn btn-danger mx-1">Delete it.</button>
+        {% include 'csrf.jinja2' %}
     </form>
 {% endblock %}

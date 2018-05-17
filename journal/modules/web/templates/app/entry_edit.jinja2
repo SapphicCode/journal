@@ -4,7 +4,7 @@
     <form action="" method="post">
         <button class="btn btn-outline-primary mx-1" type="submit">Save & View</button>
         <!-- TODO: fix hr on bootstrap solar -->
-        <hr class="my-2" />
+        <hr class="my-2"/>
         <!-- TODO: allow timezone to be set -->
         <div class="form-group">
             <label for="title">Title</label>
@@ -15,13 +15,15 @@
             <textarea class="form-control" name="body" id="body"
                       rows="{{ b.round(b.max(b.len(entry.content) / 100, 10)) }}">{{ entry.content | escape }}</textarea>
             <small class="text-muted">This field supports
-                <a href="https://daringfireball.net/projects/markdown/syntax">markdown</a> (without inline HTML).</small>
+                <a href="https://daringfireball.net/projects/markdown/syntax">markdown</a> (without inline HTML).
+            </small>
         </div>
         <div class="form-group">
             <label for="tags">Tags</label>
             <input class="form-control" name="tags" id="tags" type="text" value="{{ entry.tags_human | escape }}">
             <small class="text-muted">A comma-separated list of tags to tag this entry with.</small>
         </div>
+        {% include 'csrf.jinja2' %}
         <!-- TODO: Form CSRF with JWT (user ID & 24 hour time tolerance) -->
     </form>
 {% endblock %}

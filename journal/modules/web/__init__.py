@@ -4,10 +4,12 @@ import markdown2
 import pytz
 import requests
 import typing
+import jwt.exceptions
 from flask import Blueprint, render_template, request, Request, redirect, abort
 from jinja2 import escape
 
 from journal.db import DatabaseInterface, User
+from journal.db.util import JWTEncoder
 
 bp = Blueprint('web', __name__, url_prefix='', static_folder='static', static_url_path='/static',
                template_folder='templates')
@@ -18,6 +20,11 @@ class ExtendedRequest(Request):  # just to make my IDE happy
     db: DatabaseInterface
     recaptcha: typing.Dict[str, str]
     user: User
+    signer: JWTEncoder
+
+
+class ValidationError(Exception):
+    pass
 
 
 request: ExtendedRequest = request
@@ -31,7 +38,10 @@ def active(request: Request, page):
 
 def base_data(request: ExtendedRequest, **additional):
     # noinspection PyUnresolvedReferences
-    data = {'request': request, 'active': lambda page: active(request, page), 'b': __builtins__}
+    data = {
+        'request': request, 'active': lambda page: active(request, page), 'b': __builtins__,
+        'csrf': lambda **kwargs: generate_csrf(request, **kwargs),
+    }
     data.update(additional)
 
     data['fonts'] = {}
@@ -48,6 +58,21 @@ def base_data(request: ExtendedRequest, **additional):
     return data
 
 
+def generate_csrf(request: ExtendedRequest, expiry=60*60*24) -> str:
+    expiry = datetime.datetime.now().astimezone(pytz.UTC) + datetime.timedelta(seconds=expiry)
+    audience = str(request.user.id if request.user else None)
+    return request.signer.encode(exp=expiry, aud=audience)
+
+
+def validate_form(request: ExtendedRequest):
+    data = request.form.get('csrf', '')
+    audience = str(request.user.id if request.user else None)
+    try:
+        request.signer.decode(data, audience=audience)
+    except (jwt.DecodeError, jwt.InvalidTokenError):
+        raise ValidationError('The CSRF token submitted with the form is invalid.')
+
+
 @bp.route('/')
 def root():
     return redirect('/login', 302)
@@ -57,6 +82,12 @@ def root():
 def setup():
     token = request.cookies.get('token')
     request.user = request.db.get_user(token=token)
+
+
+@bp.before_request
+def verify_csrf():
+    if request.form:
+        validate_form(request)
 
 
 def login_required(f):
@@ -200,6 +231,11 @@ def not_found(_):
 
 @bp.errorhandler(403)
 def forbidden(_):
+    return render_template('app/403.jinja2', **base_data(request))
+
+
+@bp.errorhandler(ValidationError)
+def validation_error(_):
     return render_template('app/403.jinja2', **base_data(request))
 
 
