@@ -74,7 +74,7 @@ class Entry(Slots):
     @timestamp.setter
     def timestamp(self, value):
         self._timestamp = value
-        self._update(timestamp=value, timezone=str(value.tzinfo or pytz.UTC))
+        self._update(timestamp=value, timezone=(value.tzinfo or pytz.UTC).zone)
 
     @property
     def tags(self):
