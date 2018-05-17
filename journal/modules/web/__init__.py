@@ -30,6 +30,7 @@ def active(request: Request, page):
 
 
 def base_data(request: ExtendedRequest, **additional):
+    # noinspection PyUnresolvedReferences
     data = {'request': request, 'active': lambda page: active(request, page), 'b': __builtins__}
     data.update(additional)
 
@@ -140,7 +141,9 @@ def entries():
 @bp.route('/app/settings', methods=['GET', 'POST'])
 @login_required
 def settings():
-    data = base_data(request, timezones=pytz.common_timezones)
+    additional = {
+        'timezones': pytz.common_timezones
+    }
     if request.method == 'POST':
         warn = ''
         uname = request.form.get('username')
@@ -169,9 +172,9 @@ def settings():
         }
         request.user.settings.update(new_settings)
         request.user.save_setings()
-        return render_template('app/settings.jinja2', **data, settings=request.user.settings,
-                               notice='Settings saved.', warn=warn.strip())
-    return render_template('app/settings.jinja2', **data, settings=request.user.settings)
+        return render_template('app/settings.jinja2', **base_data(request), settings=request.user.settings,
+                               notice='Settings saved.', warn=warn.strip(), **additional)
+    return render_template('app/settings.jinja2', **base_data(request), **additional, settings=request.user.settings)
 
 
 @bp.route('/app/settings/delete-account', methods=['GET', 'POST'])
