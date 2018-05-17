@@ -9,9 +9,9 @@
     <link href="https://fonts.googleapis.com/css?family={{ fonts['body'] }}" rel="stylesheet">
 
     {% if request.user and request.user.settings.get('theme') == 'dark' %}
-        <link rel="stylesheet" href="https://bootswatch.com/4/solar/bootstrap.min.css">
+        <link rel="stylesheet" href="/static/bootstrap/solar.4.1.0.css">
     {% else %}
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/static/bootstrap/default.4.1.0.css">
     {% endif %}
 
     <style>

@@ -84,7 +84,7 @@ class User(Slots):
     @timezone.setter
     def timezone(self, value):
         self._timezone = value
-        self._update(timezone=str(value))
+        self._update(timezone=value.zone)
 
     def entries(self, tag=None):
         if tag:
