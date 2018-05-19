@@ -20,3 +20,8 @@ h1, h2, h3, h4, h5, h6 {
     width: auto;
     background-color: #769ddb;
 }
+
+small {
+    display: block;
+    line-height: 125%;
+}
