@@ -25,3 +25,8 @@ small {
     display: block;
     line-height: 150%;
 }
+
+.entry {
+    display: block;
+    line-height: 130%;
+}

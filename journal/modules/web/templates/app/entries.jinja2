@@ -8,13 +8,13 @@
     {% if entries %}
         <ul class="list-group mb-5">
             {% for entry in entries %}
-                <li class="list-group-item">
+                <li class="list-group-item entry">
                     <div class="float-right ml-2">
                         <a class="btn btn-outline-primary mx-1" href="entry/{{ entry.id }}/edit">Edit</a>
                         <a class="btn btn-outline-danger ml-1" href="entry/{{ entry.id }}/delete">Delete</a>
                     </div>
-                    <a href="entry/{{ entry.id }}/view">{{ entry.title | escape }}</a><br>
-                    <small class="text-muted">
+                    <a href="entry/{{ entry.id }}/view">{{ entry.title | escape }}</a>
+                    <small class="text-muted mt-2">
                         {{ entry.timestamp_human }}
                         {% if entry.tags %}
                             {{ "\N{BULLET}" }}
