@@ -63,7 +63,7 @@ class JWTEncoder:
 
     def encode(self, **data) -> str:
         if 'iat' not in data:
-            data['iat'] = datetime.datetime.now().astimezone(pytz.UTC)
+            data['iat'] = datetime.datetime.now(tz=pytz.UTC)
         return jwt.encode(data, self.key, 'HS256').decode()
 
     def decode(self, data: str, **kwargs) -> dict:

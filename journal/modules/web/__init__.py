@@ -59,7 +59,7 @@ def base_data(request: ExtendedRequest, **additional):
 
 
 def generate_csrf(request: ExtendedRequest, expiry=60*60*24) -> str:
-    expiry = datetime.datetime.now().astimezone(pytz.UTC) + datetime.timedelta(seconds=expiry)
+    expiry = datetime.datetime.now(tz=pytz.UTC) + datetime.timedelta(seconds=expiry)
     audience = str(request.user.id if request.user else None)
     return request.signer.encode(exp=expiry, aud=audience)
 
