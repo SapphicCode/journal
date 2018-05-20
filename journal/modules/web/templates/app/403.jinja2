@@ -2,5 +2,8 @@
 {% block container %}
     <h1>Forbidden</h1>
     <p>You do not have permission to view this page.</p>
+    {% if info %}
+        <div class="alert alert-info">{{ info | escape }}</div>
+    {% endif %}
     <img src="https://http.cat/403">
 {% endblock %}

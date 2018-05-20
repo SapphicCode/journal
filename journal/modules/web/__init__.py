@@ -235,8 +235,8 @@ def forbidden(_):
 
 
 @bp.errorhandler(ValidationError)
-def validation_error(_):
-    return render_template('app/403.jinja2', **base_data(request))
+def validation_error(e):
+    return render_template('app/403.jinja2', info=str(e), **base_data(request))
 
 
 @bp.route('/app/entry/<_id>/view')
