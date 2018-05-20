@@ -6,7 +6,7 @@
     <hr class="my-2" />
     <small class="text-muted">
         {{ entry.timestamp_human }}
-        {% if entry.tags %} {{ "\N{BULLET}" }} {{ entry.tags_human }} {% endif %}
+        {% if entry.tags %} &bullet; {{ entry.tags_human | escape }} {% endif %}
     </small>
     <h1>{{ entry.title | escape }}</h1>
     <hr class="my-2" />

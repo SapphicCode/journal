@@ -17,7 +17,7 @@
                     <small class="text-muted mt-2">
                         {{ entry.timestamp_human }}
                         {% if entry.tags %}
-                            {{ "\N{BULLET}" }}
+                            &bullet;
                             {% for tag in entry.tags %}
                                 <a href="entries?tag={{ tag | urlencode }}">{{ tag | escape }}</a>
                                 {{ "\N{BULLET}" if not loop.last }}
