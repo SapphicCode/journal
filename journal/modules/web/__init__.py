@@ -220,6 +220,8 @@ def settings():
                 new_token_required = True
             except ValueError as e:
                 warn += f'{e}\n'
+            except OverflowError:
+                warn += f'Please pick a smaller session expiry time.'
         request.user.settings.update(new_settings)
         request.user.save_setings()
 
