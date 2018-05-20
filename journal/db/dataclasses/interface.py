@@ -19,7 +19,6 @@ class DatabaseInterface:
 
         self.users = self.db.get_collection('users')
         self.users.create_index([('username', pymongo.ASCENDING)], unique=True)
-        self.users.create_index([('tokens', pymongo.ASCENDING)])
 
         self.entries = self.db.get_collection('entries')
         self.entries.create_index([('author_id', pymongo.ASCENDING)])
