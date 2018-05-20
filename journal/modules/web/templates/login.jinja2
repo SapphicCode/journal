@@ -5,7 +5,7 @@
     <h2>Pandentia's Journal</h2>
     <h3>Log in or sign up</h3>
     {% if warn %}
-        <div class="alert alert-danger" role="alert">{{warn}}</div>
+        <div class="alert alert-danger" role="alert">{{ warn | escape }}</div>
     {% endif %}
     <!--suppress HtmlUnknownTarget -->
     <form action="" method="post">

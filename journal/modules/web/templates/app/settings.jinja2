@@ -3,10 +3,10 @@
     <form action="" method="post">
         <button type="submit" class="btn btn-outline-primary mx-1">Save</button>
         {% if notice %}
-            <div class="alert alert-info my-2">{{ notice }}</div>
+            <div class="alert alert-info my-2">{{ notice | escape }}</div>
         {% endif %}
         {% if warn %}
-            <div class="alert alert-warning my-2">{{ warn }}</div>
+            <div class="alert alert-warning my-2">{{ warn | escape }}</div>
         {% endif %}
         <hr class="my-2"/>
 
@@ -17,7 +17,7 @@
         <div class="form-group">
             <label for="username">Username</label>
             <input id="username" name="username" type="text" class="form-control"
-                   placeholder="{{ request.user.username }}">
+                   placeholder="{{ request.user.username | escape }}">
             <small class="text-muted">
                 This is the name you use to log in. Usually you don't want to change this.
                 It can consist of lowercase alphanumerics, <code>_</code>, <code>-</code> and <code>.</code>.
@@ -52,7 +52,7 @@
         <div class="form-group">
             <label for="display-name">Display Name</label>
             <input id="display-name" name="display-name" type="text" class="form-control"
-                   placeholder="{{ request.user.display_name }}">
+                   placeholder="{{ request.user.display_name | escape }}">
             <small class="text-muted">
                 This is the name the service uses to refer to you, for instance in the page
                 title.
@@ -62,10 +62,10 @@
         <div class="form-group">
             <label for="timezone">Timezone</label>
             <select id="timezone" name="timezone" class="form-control">
-                <option selected>{{ request.user.timezone }}</option>
+                <option selected>{{ request.user.timezone | escape }}</option>
                 <option></option>
                 {% for timezone in timezones %}
-                    <option>{{ timezone }}</option>
+                    <option>{{ timezone | escape }}</option>
                 {% endfor %}
             </select>
             <small class="text-muted">This is the timezone used to create future entries.</small>
@@ -90,12 +90,13 @@
         <div class="form-group">
             <label for="title-font">Titles</label>
             <input id="title-font" name="title-font" type="text" class="form-control"
-                   placeholder="{{ fonts['title'] }}">
+                   placeholder="{{ fonts['title'] | escape }}">
         </div>
 
         <div class="form-group">
             <label for="body-font">Body</label>
-            <input id="body-font" name="body-font" type="text" class="form-control" placeholder="{{ fonts['body'] }}">
+            <input id="body-font" name="body-font" type="text" class="form-control"
+                   placeholder="{{ fonts['body'] | escape }}">
         </div>
 
         {% include 'csrf.jinja2' %}
