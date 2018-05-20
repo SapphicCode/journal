@@ -1,4 +1,5 @@
 import argon2
+import datetime
 import pymongo
 import pymongo.errors
 import pymongo.results
@@ -23,6 +24,8 @@ class User(Slots):
         self.tokens = data.get('tokens', [])
         self.flags = data.get('flags', [])
         self._timezone = pytz.timezone(data.get('timezone', 'UTC'))
+        self._token_revision = data.get('token_revision', 0)
+        self._token_expiry = data.get('token_expiry')
         self.settings = data.get('settings', {})
 
     def __repr__(self):
@@ -38,6 +41,11 @@ class User(Slots):
     def _update(self, **fields) -> pymongo.results.UpdateResult:
         res = self.db.users.update_one({'_id': self.id}, {'$set': fields})
         assert res.matched_count == 1
+        return res
+
+    def _increment(self, **fields):
+        res = self.db.users.update_one({'_id': self.id}, {'$inc': fields})
+        assert res.modified_count == 1  # we're assuming it actually was incremented
         return res
 
     @property
@@ -76,6 +84,7 @@ class User(Slots):
         del value  # get that thing out of memory ASAP
         self._pw_hash = password
         self._update(password=password)
+        self.invalidate_tokens()
 
     @property
     def timezone(self):
@@ -85,6 +94,36 @@ class User(Slots):
     def timezone(self, value):
         self._timezone = value
         self._update(timezone=value.zone)
+
+    @property
+    def token_revision(self) -> int:
+        return self._token_revision
+
+    def invalidate_tokens(self):
+        self._token_revision += 1  # state-keeping the best we can
+        self._increment(token_revision=1)
+
+    @property
+    def token_expiry(self) -> typing.Optional[datetime.timedelta]:
+        if not self._token_expiry:
+            return
+        return datetime.timedelta(seconds=self._token_expiry)
+
+    @token_expiry.setter
+    def token_expiry(self, value: typing.Optional[datetime.timedelta]):
+        if value is not None:
+            value = int(value.total_seconds())
+            value = value if value != 0 else None
+        self._token_expiry = value
+        self._update(token_expiry=value)
+
+    def create_token(self) -> str:
+        expiry = None
+        additional = {}
+        if self.token_expiry:
+            expiry = datetime.datetime.now(tz=pytz.UTC) + self.token_expiry
+            additional['exp'] = expiry
+        return self.db.jwt.encode(uid=self.id, rev=self.token_revision, **additional)
 
     def entries(self, tag=None):
         if tag:

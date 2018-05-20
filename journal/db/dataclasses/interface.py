@@ -1,23 +1,14 @@
 # noinspection PyPackageRequirements
 import argon2
+import jwt
 import pymongo
 import pymongo.errors
 import pytz
-import random
 import typing
 from bson.codec_options import CodecOptions
 
 from journal.db.dataclasses import User, Entry
 from journal.db.util import IDGenerator, JWTEncoder
-
-token_ranges = (
-    (0x30, 0x39),  # digits
-    (0x41, 0x5a),  # upper alpha
-    (0x61, 0x7a),  # lower alpha
-)
-token_chars = []
-[[token_chars.append(chr(x)) for x in range(y[0], y[1] + 1)] for y in token_ranges]
-del token_ranges
 
 
 class DatabaseInterface:
@@ -61,26 +52,31 @@ class DatabaseInterface:
             data = self.users.find_one({'username': username.lower()})
         if email:
             data = self.users.find_one({'email': email})
-        if token:
-            data = self.users.find_one({'tokens': token})
         if id:
             data = self.users.find_one({'_id': id})
+        if token:  # ! special case
+            try:
+                token_data = self.jwt.decode(token)
+            except jwt.InvalidTokenError:
+                return
+            for f in ['uid', 'rev']:
+                if f not in token_data:
+                    return
+            user = self.get_user(id=token_data['uid'])
+            if not user:  # might happen, user could've deleted their account
+                return
+            if user.token_revision != token_data['rev']:
+                return
+            return user
 
         if not data:
             return
 
+        # migration
+        if 'tokens' in data:
+            self.users.update_one({'_id': data['_id']}, {'$unset': {'tokens': None}})
+
         return User(self, **data)
-
-    def create_token(self, user: User) -> str:
-        new_token = ''.join(random.choice(token_chars) for _ in range(128))
-        res = self.users.update_one({'_id': user.id}, {'$push': {'tokens': new_token}})
-        assert res.matched_count == 1, 'User given to create_token not found'
-        return new_token
-
-    def invalidate_tokens(self, user: User):
-        user.tokens = []
-        res = self.users.update_one({'_id': user.id}, {'$unset': {'tokens': 1}})
-        assert res.matched_count == 1, 'User given to invalidate_tokens not found'
 
     def create_entry(self, user: User) -> Entry:
         e = Entry(self, _id=self.id_gen.generate(), timezone=str(user.timezone))

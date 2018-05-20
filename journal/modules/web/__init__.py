@@ -1,11 +1,11 @@
 import datetime
 import functools
+import jwt.exceptions
 import markdown2
 import pytz
 import requests
 import typing
-import jwt.exceptions
-from flask import Blueprint, render_template, request, Request, redirect, abort
+from flask import Blueprint, render_template, request, Request, redirect, abort, Response
 from jinja2 import escape
 
 from journal.db import DatabaseInterface, User
@@ -56,7 +56,7 @@ def base_data(request: ExtendedRequest, **additional):
     return data
 
 
-def generate_csrf(request: ExtendedRequest, expiry=60*60*24) -> str:
+def generate_csrf(request: ExtendedRequest, expiry=60 * 60 * 24) -> str:
     expiry = datetime.datetime.now(tz=pytz.UTC) + datetime.timedelta(seconds=expiry)
     audience = str(request.user.id if request.user else None)
     return request.db.jwt.encode(exp=expiry, aud=audience)
@@ -94,6 +94,7 @@ def login_required(f):
         if not request.user:
             return redirect('/logout', 302)
         return f(*args, **kwargs)
+
     return decorated
 
 
@@ -123,7 +124,7 @@ def login():
         user = request.db.get_user(username=username)
         if user:
             if user.check_pw(password):
-                resp.set_cookie('token', request.db.create_token(user),
+                resp.set_cookie('token', user.create_token(),
                                 expires=datetime.datetime.now(tz=pytz.UTC) + datetime.timedelta(days=365))
                 return resp
             else:
@@ -134,7 +135,8 @@ def login():
             except AssertionError as e:
                 return render_template('login.jinja2', **base_data(request),
                                        warn='Unable to create account: {}'.format(e))
-            resp.set_cookie('token', request.db.create_token(user))
+            resp.set_cookie('token', user.create_token(),
+                            expires=datetime.datetime.now(tz=pytz.UTC) + datetime.timedelta(days=365))
             return resp
 
     token = request.cookies.get('token')
@@ -175,6 +177,8 @@ def settings():
     }
     if request.method == 'POST':
         warn = ''
+        new_token_required = False
+
         uname = request.form.get('username')
         if uname:
             try:
@@ -186,6 +190,7 @@ def settings():
             request.user.display_name = dname
         if request.form.get('password'):
             request.user.password = request.form.get('password')
+            new_token_required = True
         theme = request.form.get('theme')
         if theme in ['light', 'dark']:
             request.user.settings['theme'] = theme
@@ -201,8 +206,14 @@ def settings():
         }
         request.user.settings.update(new_settings)
         request.user.save_setings()
-        return render_template('app/settings.jinja2', **base_data(request), settings=request.user.settings,
-                               notice='Settings saved.', warn=warn.strip(), **additional)
+
+        r = render_template('app/settings.jinja2', **base_data(request), settings=request.user.settings,
+                            notice='Settings saved.', warn=warn.strip(), **additional)
+        r = Response(r)
+        if new_token_required:
+            r.set_cookie('token', request.user.create_token(),
+                         expires=datetime.datetime.now(tz=pytz.UTC) + datetime.timedelta(days=365))
+        return r
     return render_template('app/settings.jinja2', **base_data(request), **additional, settings=request.user.settings)
 
 
