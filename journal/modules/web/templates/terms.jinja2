@@ -1,0 +1,131 @@
+{% extends "main.jinja2" %}
+{% block body %}
+    <div class="container">
+        <h1>Terms of Service and Privacy Policy</h1>
+
+        <div class="alert alert-warning">
+            This application is still in development and these terms may change at any time.
+            Be sure to keep an eye on the <a href="https://gitlab.com/pandentia/journal">GitLab repository</a>
+            for updates to the terms.
+        </div>
+
+        <h2>Events in which this document is nullified</h2>
+
+        <ul>
+            <li>
+                If this is a self-hosted instance (one that does not reside at
+                <a href="https://jrnl-pandentia.qcx.io">https://jrnl-pandentia.qcx.io</a>).
+                These are subject to terms of their respective hosts.
+            </li>
+        </ul>
+
+        <h2>Agreements</h2>
+
+        <ul>
+            <li>
+                By using this service you agree to these Terms of Service and the Privacy Policy contained therein.
+            </li>
+            <li>
+                You agree that you are <b>at least 16 years of age</b>.
+                Quoting the <a href="https://gdpr-info.eu/art-8-gdpr/">GDPR</a> directly,<br>
+                <blockquote class="blockquote mb-0">
+                    <p class="mb-0">
+                        Where the child is below the age of 16 years, such processing shall be lawful only if and to the
+                        extent that consent is given or authorised by the holder of parental responsibility over the
+                        child.
+                        Member States may provide by law for a lower age for those purposes provided that such lower age
+                        is not below 13 years.
+                    </p>
+                </blockquote>
+            </li>
+            <li>
+                You agree not to transmit any data that may damage the operation of the service.
+            </li>
+            <li>
+                You agree not to exploit the service through any bug that may arise.
+            </li>
+        </ul>
+
+        <p>
+            These agreements are not meant to be exhaustive and we reserve the right to determine what we consider a
+            breach of the agreement, and to take action including terminating your user account and excluding you from
+            using the service.
+        </p>
+
+        <h2>How the service uses data you provide</h2>
+
+        <p>
+            The service uses the data you provide to give you a good journaling experience.
+            The following is a list of how the data you give us is used.
+        </p>
+
+        <ul>
+            <li>
+                <b>Name</b>:
+                Your username and display name are used to render the pages that you see.
+                Your display name for instance is used to render the name in the window title.
+                Your username is used during the login process.
+            </li>
+            <li>
+                <b>Password</b>:
+                Your password is used to log you into the service. It is
+                <a href="https://www.youtube.com/watch?v=yoMOAIzBSpY">hashed</a> with
+                <a href="https://en.wikipedia.org/wiki/Argon2">Argon2</a> and stored in the database to be compared
+                against for future login attempts.
+                (If you're confused about any of those terms, click the links.)
+            </li>
+            <li>
+                <b>Entry content</b>:
+                Entry content (Titles, body and tags) is used to render the app's pages.
+                Entry titles and tags are used to render and filter the entries list, everything is used to render the
+                entry view and entry edit screens. Entry title is also used to render the entry delete screen.
+            </li>
+        </ul>
+
+        <p>
+            The service intentionally refrains from associating email or social media accounts with the users it stores,
+            to provide privacy from the kinds of services (for instance Google, Facebook, Twitter) that would otherwise
+            look at data being entered on pages and store it in accordance with their privacy statements.
+        </p>
+
+        <h2>Cookies</h2>
+
+        <p>The service uses browser cookies to authenticate you and recognize you when you come back.</p>
+
+        <h2>Third party services</h2>
+
+        <p>
+            This application is hosted over <a href="https://cloudflare.com">Cloudflare</a> for DDoS and spam
+            protection services. Some parts of their Terms of Service and Privacy Policy may apply to this service
+            by extension.<br>
+            The login page of this service also uses Google reCAPTCHA and Google's own terms may apply to this section
+            of the service.
+        </p>
+
+        <h2>Data retention, usage and uptime</h2>
+
+        <p>
+            We can make no uptime guarantees, as this service is hosted as a personal-use service. It is recommended to
+            look at the <a href="https://stats.uptimerobot.com/6XMrWtWBK">uptime record</a> and make an informed
+            decision based on that.
+            <br>
+            As far as data retention is concerned, we take reasonable steps to ensure that data is protected from loss
+            or unauthorized access. We allow users to correct potentially incorrect data stored on the service about
+            them. Personal data is only ever processed in a relevant context for which it was collected.
+        </p>
+
+        <h2>Contact</h2>
+
+        <p>
+            If you have questions or concerns, feel free to <a href="mailto:hi@pandentia.qcx.io">contact me by email</a>
+            or on Discord under the handle <code>Liara#0001</code>.
+        </p>
+
+        <h2>Encouragement to self-host and disagreements</h2>
+
+        <p>
+            If for whatever reason you do not agree to these terms, you are encouraged to host the service yourself.
+            Its source code is public and open source on <a href="https://gitlab.com/pandentia/journal">GitLab</a>.
+        </p>
+    </div>
+{% endblock %}

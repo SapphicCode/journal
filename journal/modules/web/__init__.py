@@ -98,6 +98,11 @@ def login_required(f):
     return decorated
 
 
+@bp.route('/terms')
+def terms():
+    return render_template('terms.jinja2', **base_data(request))
+
+
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
