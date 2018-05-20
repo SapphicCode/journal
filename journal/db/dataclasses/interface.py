@@ -8,7 +8,7 @@ import typing
 from bson.codec_options import CodecOptions
 
 from journal.db.dataclasses import User, Entry
-from journal.db.util import IDGenerator
+from journal.db.util import IDGenerator, JWTEncoder
 
 token_ranges = (
     (0x30, 0x39),  # digits
@@ -21,7 +21,7 @@ del token_ranges
 
 
 class DatabaseInterface:
-    def __init__(self, mongo_uri, db_name, worker_id):
+    def __init__(self, mongo_uri, db_name, worker_id, signing_key):
         # noinspection PyArgumentList
         options = CodecOptions(tz_aware=True, tzinfo=pytz.UTC)
         self.db = pymongo.MongoClient(mongo_uri).get_database(db_name, codec_options=options)
@@ -36,6 +36,7 @@ class DatabaseInterface:
 
         self.argon2 = argon2.PasswordHasher()
         self.id_gen = IDGenerator(int(worker_id))
+        self.jwt = JWTEncoder(signing_key)
 
     def create_user(self, username: str, password: str) -> typing.Optional[User]:
         _id = self.id_gen.generate()

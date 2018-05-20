@@ -9,7 +9,6 @@ from flask import Blueprint, render_template, request, Request, redirect, abort
 from jinja2 import escape
 
 from journal.db import DatabaseInterface, User
-from journal.db.util import JWTEncoder
 
 bp = Blueprint('web', __name__, url_prefix='', static_folder='static', static_url_path='/static',
                template_folder='templates')
@@ -20,7 +19,6 @@ class ExtendedRequest(Request):  # just to make my IDE happy
     db: DatabaseInterface
     recaptcha: typing.Dict[str, str]
     user: User
-    signer: JWTEncoder
 
 
 class ValidationError(Exception):
@@ -61,14 +59,14 @@ def base_data(request: ExtendedRequest, **additional):
 def generate_csrf(request: ExtendedRequest, expiry=60*60*24) -> str:
     expiry = datetime.datetime.now(tz=pytz.UTC) + datetime.timedelta(seconds=expiry)
     audience = str(request.user.id if request.user else None)
-    return request.signer.encode(exp=expiry, aud=audience)
+    return request.db.jwt.encode(exp=expiry, aud=audience)
 
 
 def validate_form(request: ExtendedRequest):
     data = request.form.get('csrf', '')
     audience = str(request.user.id if request.user else None)
     try:
-        request.signer.decode(data, audience=audience)
+        request.db.jwt.decode(data, audience=audience)
     except (jwt.DecodeError, jwt.InvalidTokenError):
         raise ValidationError('The CSRF token submitted with the form is invalid.')
 
