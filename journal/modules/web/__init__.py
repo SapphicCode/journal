@@ -179,18 +179,21 @@ def settings():
         warn = ''
         new_token_required = False
 
+        # security settings
         uname = request.form.get('username')
         if uname:
             try:
                 request.user.username = uname
             except AssertionError as e:
                 warn += str(e) + '\n'
-        dname = request.form.get('display-name')
-        if dname:
-            request.user.display_name = dname
         if request.form.get('password'):
             request.user.password = request.form.get('password')
             new_token_required = True
+
+        # personalization
+        dname = request.form.get('display-name')
+        if dname:
+            request.user.display_name = dname
         theme = request.form.get('theme')
         if theme in ['light', 'dark']:
             request.user.settings['theme'] = theme
@@ -204,6 +207,19 @@ def settings():
             'title_font': request.form.get('title-font'),
             'body_font': request.form.get('body-font'),
         }
+        expiry = request.form.get('session-length')
+        if expiry:
+            try:
+                expiry = int(expiry)
+                if expiry < 0:
+                    raise ValueError('Cannot have a negative expiry time.')
+                if 0 < expiry < 3600:  # cleverly dodging 0
+                    raise ValueError('A session expiry time under 1 hour is potentially dangerous '
+                                     'and could lock you out of your account forever.')
+                request.user.token_expiry = datetime.timedelta(seconds=expiry)
+                new_token_required = True
+            except ValueError as e:
+                warn += f'{e}\n'
         request.user.settings.update(new_settings)
         request.user.save_setings()
 

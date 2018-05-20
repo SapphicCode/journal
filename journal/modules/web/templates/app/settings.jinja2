@@ -12,21 +12,15 @@
 
         <h2>User Info</h2>
 
+        <h3>Security</h3>
+
         <div class="form-group">
             <label for="username">Username</label>
-            <input id="username" name="username" type="text" class="form-control" value="{{ request.user.username }}">
+            <input id="username" name="username" type="text" class="form-control"
+                   placeholder="{{ request.user.username }}">
             <small class="text-muted">
                 This is the name you use to log in. Usually you don't want to change this.
                 It can consist of lowercase alphanumerics, <code>_</code>, <code>-</code> and <code>.</code>.
-            </small>
-        </div>
-
-        <div class="form-group">
-            <label for="display-name">Display Name</label>
-            <input id="display-name" name="display-name" type="text" class="form-control"
-                   value="{{ request.user.display_name }}">
-            <small class="text-muted">This is the name the service uses to refer to you, for instance in the page
-                title.
             </small>
         </div>
 
@@ -35,7 +29,33 @@
             <input id="password" name="password" type="password" class="form-control" autocomplete="new-password">
             <small class="text-muted">
                 If you want to change your password, fill in this field.
-                Please note that this will log you out of all other sessions for security reasons.
+                Please note that this will log out of all other sessions for security reasons.
+            </small>
+        </div>
+
+        <div class="form-group">
+            <label for="session-length">Session Length</label>
+            <input id="session-length" name="session-length" class="form-control" type="number"
+                   placeholder="{{ b.int(request.user.token_expiry.total_seconds()) if request.user.token_expiry else "0" }}">
+            <small class="text-muted">
+                This is the maximum amount of time (in seconds) that a session can last for before it will be logged
+                out. <code>0</code> disables this functionality.<br>
+                Please note that changing this will also log out all other sessions for security reasons.
+            </small>
+        </div>
+
+        <label>Account deletion (aka GDPR compliance)</label><br>
+        <a href="settings/delete-account" class="btn btn-outline-danger mb-2">Delete my account</a>
+
+        <h3>Personalization</h3>
+
+        <div class="form-group">
+            <label for="display-name">Display Name</label>
+            <input id="display-name" name="display-name" type="text" class="form-control"
+                   placeholder="{{ request.user.display_name }}">
+            <small class="text-muted">
+                This is the name the service uses to refer to you, for instance in the page
+                title.
             </small>
         </div>
 
@@ -51,12 +71,9 @@
             <small class="text-muted">This is the timezone used to create future entries.</small>
         </div>
 
-        <label>Account deletion (aka GDPR compliance)</label><br>
-        <a href="settings/delete-account" class="btn btn-outline-danger mb-2">Delete my account</a>
+        <h4>UI</h4>
 
-        <h2>UI</h2>
-
-        <h3>Theme</h3>
+        <h5>Theme</h5>
 
         <div class="form-group">
             <input id="theme-light" name="theme" type="radio"
@@ -67,17 +84,18 @@
             <label for="theme-dark">Dark</label>
         </div>
 
-        <h3>Fonts</h3>
+        <h5>Fonts</h5>
 
         <small class="text-muted">Any font on <a href="https://fonts.google.com">Google Fonts</a> is supported.</small>
         <div class="form-group">
             <label for="title-font">Titles</label>
-            <input id="title-font" name="title-font" type="text" class="form-control" value="{{ fonts['title'] }}">
+            <input id="title-font" name="title-font" type="text" class="form-control"
+                   placeholder="{{ fonts['title'] }}">
         </div>
 
         <div class="form-group">
             <label for="body-font">Body</label>
-            <input id="body-font" name="body-font" type="text" class="form-control" value="{{ fonts['body'] }}">
+            <input id="body-font" name="body-font" type="text" class="form-control" placeholder="{{ fonts['body'] }}">
         </div>
 
         {% include 'csrf.jinja2' %}

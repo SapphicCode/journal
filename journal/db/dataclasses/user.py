@@ -116,13 +116,12 @@ class User(Slots):
             value = value if value != 0 else None
         self._token_expiry = value
         self._update(token_expiry=value)
+        self.invalidate_tokens()
 
     def create_token(self) -> str:
-        expiry = None
         additional = {}
         if self.token_expiry:
-            expiry = datetime.datetime.now(tz=pytz.UTC) + self.token_expiry
-            additional['exp'] = expiry
+            additional['exp'] = datetime.datetime.now(tz=pytz.UTC) + self.token_expiry
         return self.db.jwt.encode(uid=self.id, rev=self.token_revision, **additional)
 
     def entries(self, tag=None):
