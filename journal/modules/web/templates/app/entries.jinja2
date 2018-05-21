@@ -13,17 +13,16 @@
                         <a class="btn btn-outline-primary mx-1" href="entry/{{ entry.id }}/edit">Edit</a>
                         <a class="btn btn-outline-danger ml-1" href="entry/{{ entry.id }}/delete">Delete</a>
                     </div>
-                    <a href="entry/{{ entry.id }}/view">{{ entry.title | escape }}</a>
-                    <small class="text-muted mt-2">
-                        {{ entry.timestamp_human }}
-                        {% if entry.tags %}
-                            &bullet;
-                            {% for tag in entry.tags %}
-                                <a href="entries?tag={{ tag | urlencode }}">{{ tag | escape }}</a>
-                                {{ "\N{BULLET}" if not loop.last }}
-                            {% endfor %}
-                        {% endif %}
-                    </small>
+                    <a href="entry/{{ entry.id }}/view">{{ entry.title | escape }}</a><br>
+
+                    <span class="badge badge-primary">{{ entry.timestamp_human }}</span>
+
+                    {% if entry.tags %}
+                        {% for tag in entry.tags %}
+                            <a class="badge badge-secondary"
+                               href="entries?tag={{ tag | urlencode }}">{{ tag | escape }}</a>
+                        {% endfor %}
+                    {% endif %}
                 </li>
             {% endfor %}
         </ul>
