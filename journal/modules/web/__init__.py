@@ -210,8 +210,8 @@ def settings():
             except pytz.UnknownTimeZoneError:
                 warn += 'Unknown time zone selected. What are you playing at?\n'
         new_settings = {
-            'title_font': request.form.get('title-font'),
-            'body_font': request.form.get('body-font'),
+            'title_font': request.form.get('title-font') or request.user.settings.get('title_font'),
+            'body_font': request.form.get('body-font') or request.user.settings.get('body_font'),
         }
         expiry = request.form.get('session-length')
         if expiry:
