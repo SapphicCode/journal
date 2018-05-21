@@ -5,7 +5,7 @@ import markdown2
 import pytz
 import requests
 import typing
-from flask import Blueprint, render_template, request, Request, redirect, abort, Response
+from flask import Blueprint, render_template, request, Request, redirect, abort, Response, current_app
 from jinja2 import escape
 
 from journal.db import DatabaseInterface, User
@@ -38,7 +38,7 @@ def base_data(request: ExtendedRequest, **additional):
     # noinspection PyUnresolvedReferences
     data = {
         'request': request, 'active': lambda page: active(request, page), 'b': __builtins__,
-        'csrf': lambda **kwargs: generate_csrf(request, **kwargs),
+        'csrf': lambda **kwargs: generate_csrf(request, **kwargs), 'app': current_app,
     }
     data.update(additional)
 
@@ -113,18 +113,19 @@ def login():
         if not (username and password):
             return render_template('login.jinja2', **base_data(request), warn='Required fields left empty.')
 
-        captcha = request.form.get('g-recaptcha-response')
-        if not captcha:
-            captcha = 'fail'
-        success = session.post(
-            'https://www.google.com/recaptcha/api/siteverify',
-            data={
-                'secret': request.recaptcha['secret'],
-                'response': captcha,
-            }
-        ).json()['success']
-        if not success:
-            return render_template('login.jinja2', **base_data(request), warn='reCAPTCHA failed.')
+        if not current_app.debug:
+            captcha = request.form.get('g-recaptcha-response')
+            if not captcha:
+                captcha = 'fail'
+            success = session.post(
+                'https://www.google.com/recaptcha/api/siteverify',
+                data={
+                    'secret': request.recaptcha['secret'],
+                    'response': captcha,
+                }
+            ).json()['success']
+            if not success:
+                return render_template('login.jinja2', **base_data(request), warn='reCAPTCHA failed.')
 
         user = request.db.get_user(username=username)
         if user:

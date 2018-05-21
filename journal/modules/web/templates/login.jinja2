@@ -1,37 +1,49 @@
 {% extends "main.jinja2" %}
 {% block body %}
-<script src="https://www.google.com/recaptcha/api.js" async defer></script>
-<div class="centered">
-    <h2>Pandentia's Journal</h2>
-    <h3>Log in or sign up</h3>
-    {% if warn %}
-        <div class="alert alert-danger" role="alert">{{ warn | escape }}</div>
-    {% endif %}
-    <!--suppress HtmlUnknownTarget -->
-    <form action="" method="post">
-        <div class="form-group">
-            <label>Username</label>
-            <input type="text" class="form-control" name="username" placeholder="elon.musk">
-        </div>
-        <div class="form-group">
-            <label>Password</label>
-            <input type="password" class="form-control" name="password" placeholder="spaceRoadst3r">
-        </div>
-        <div class="form-group">
-            <label>Captcha</label>
-            <div class="g-recaptcha" data-sitekey="{{ request.recaptcha['site'] }}" data-callback="submit_form"></div>
-        </div>
-        <div id="submit"><br><button class="btn btn-primary" type="submit">Submit</button><br></div>
-        <small class="text-muted">By logging in you agree to the <a href="terms">terms</a>.</small>
-        {% include 'csrf.jinja2' %}
-    </form>
-    <!--suppress JSUnusedLocalSymbols -->
-    <script>
-        let btn = document.getElementById("submit");
-        btn.style.display = 'none';
-        function submit_form() {
-            btn.children[1].click();
-        }
-    </script>
-</div>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <div class="centered">
+        <h2>Pandentia's Journal</h2>
+        <h3>Log in or sign up</h3>
+        {% if warn %}
+            <div class="alert alert-danger" role="alert">{{ warn | escape }}</div>
+        {% endif %}
+        <!--suppress HtmlUnknownTarget -->
+        <form action="" method="post">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" class="form-control" name="username" placeholder="elon.musk">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" class="form-control" name="password" placeholder="spaceRoadst3r">
+            </div>
+
+            {% if not app.debug %}
+                <div class="form-group">
+                    <label>Captcha</label>
+                    <div class="g-recaptcha" data-sitekey="{{ request.recaptcha['site'] }}" data-callback="submit_form"
+                         id="recaptcha"></div>
+                </div>
+            {% endif %}
+
+            <div id="submit">
+                <button class="btn btn-primary" type="submit">Submit</button>
+            </div>
+            <br>
+            <small class="text-muted">By logging in you agree to the <a href="terms">terms</a>.</small>
+            {% include 'csrf.jinja2' %}
+        </form>
+        <!--suppress JSUnusedLocalSymbols -->
+        <script>
+            let btn = document.getElementById("submit");
+            let captcha = document.getElementById('recaptcha');
+            if (!isNull(captcha)) {
+                btn.style.display = 'none';
+
+                function submit_form() {
+                    btn.children[1].click();
+                }
+            }
+        </script>
+    </div>
 {% endblock %}

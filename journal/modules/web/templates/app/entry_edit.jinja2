@@ -13,7 +13,8 @@
         <div class="form-group">
             <label for="body">Content</label>
             <textarea class="form-control" name="body" id="body"
-                      rows="{{ b.round(b.max(b.len(entry.content) / 100, 10)) }}">{{ entry.content | escape }}</textarea>
+                      rows="{{ b.round(b.max(b.len(entry.content) / 75, 10)) }}"
+            >{{ entry.content | escape }}{{ '\n' }}</textarea>
             <small class="text-muted">This field supports
                 <a href="https://daringfireball.net/projects/markdown/syntax">markdown</a> (without inline HTML).
             </small>
@@ -24,6 +25,5 @@
             <small class="text-muted">A comma-separated list of tags to tag this entry with.</small>
         </div>
         {% include 'csrf.jinja2' %}
-        <!-- TODO: Form CSRF with JWT (user ID & 24 hour time tolerance) -->
     </form>
 {% endblock %}
