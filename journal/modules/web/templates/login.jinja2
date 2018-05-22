@@ -37,7 +37,7 @@
         <script>
             let btn = document.getElementById("submit");
             let captcha = document.getElementById('recaptcha');
-            if (!isNull(captcha)) {
+            if (captcha !== null) {
                 btn.style.display = 'none';
 
                 function submit_form() {
