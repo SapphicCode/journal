@@ -8,4 +8,4 @@ __pycache__/
 *$py.class
 
 # project-specific
-config.ini
+config.yml

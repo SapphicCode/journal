@@ -1,3 +1,4 @@
+import yaml
 from flask import Flask, request
 
 from journal.db import DatabaseInterface
@@ -16,7 +17,20 @@ def create_app(**settings) -> Flask:
     @app.before_request
     def setup():
         request.db = db
-        request.recaptcha = settings['recaptcha']
+        request.recaptcha = {'secret': settings['recaptcha_secret'], 'site': settings['recaptcha_site']}
         return
 
+    return app
+
+
+def create_app_from_config_file(path='config.yml'):
+    data = yaml.safe_load(open(path))
+    app = create_app(
+        idgen_worker_id=data.get('idgen_worker_id', 0),
+        mongodb_db=data.get('mongodb_db', 'journal'),
+        mongodb_uri=data.get('mongodb_uri', 'mongodb://localhost'),
+        recaptcha_secret=data.get('recaptcha_secret', '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'),
+        recaptcha_site=data.get('recaptcha_site', '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'),
+        secret_key=data['secret_key'],
+    )
     return app

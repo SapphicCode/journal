@@ -1,12 +1,11 @@
 import datetime
 import functools
 import jwt.exceptions
-import markdown2
+import mistune
 import pytz
 import requests
 import typing
 from flask import Blueprint, render_template, request, Request, redirect, abort, Response, current_app
-from jinja2 import escape
 
 from journal.db import DatabaseInterface, User
 
@@ -26,6 +25,7 @@ class ValidationError(Exception):
 
 
 request: ExtendedRequest = request
+markdown = mistune.Markdown()
 
 
 def active(request: Request, page):
@@ -283,7 +283,7 @@ def entry_view(_id):
         return abort(404)
 
     return render_template('app/entry_view.jinja2', **base_data(request),
-                           entry_html=markdown2.markdown(escape(entry.content)), entry=entry)
+                           entry_html=markdown(entry.content), entry=entry)
 
 
 @bp.route('/app/entry/<_id>/edit', methods=['GET', 'POST'])
