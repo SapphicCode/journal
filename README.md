@@ -31,7 +31,9 @@ secret_key: 'some secret string'  # CHANGE THIS!
 Optionally, it can also contain more arguments. They are listed with their
 defaults here.
 ```yml
-idgen_worker_id: 0  # for multiple workers, switch from 0 to 16
+# the ID-generating service requires a worker ID from 0-15
+# if you have multiple workers, set this accordingly
+idgen_worker_id: 0
 
 # mongodb connection information
 mongodb_uri: 'mongodb://localhost'
