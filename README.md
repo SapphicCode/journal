@@ -76,6 +76,11 @@ pandentia/journal:latest \
 # [optional gunicorn arguments]
 ```
 
+### Updating
+
+I highly recommend [Watchtower](https://duckduckgo.com/?q=watchtower+docker)
+for this task.
+
 ## Local
 
 `run-gunicorn.sh` does most of the legwork for you here.
@@ -83,3 +88,9 @@ pandentia/journal:latest \
 ```sh
 ./run-gunicorn.sh  # [optional gunicorn args]
 ```
+
+### Updating
+
+`git pull` will update your instance to the newest version.
+
+You should also restart your workers after this.
