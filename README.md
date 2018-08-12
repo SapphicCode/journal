@@ -58,7 +58,7 @@ be aware of it.
 
 These proxies will also allow for much easier use of SSL.
 
-Please be insert the following headers correctly:
+Please insert the following headers correctly:
 `Host`, `X-Real-IP`, `X-Forwarded-For`. Caddy has a proxy option called
 `transparent` that will do this for you.
 
