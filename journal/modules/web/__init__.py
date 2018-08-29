@@ -113,7 +113,7 @@ def login():
         if not (username and password):
             return render_template('login.jinja2', **base_data(request), warn='Required fields left empty.')
 
-        if not current_app.debug:
+        if current_app.recaptcha_enabled:
             captcha = request.form.get('g-recaptcha-response')
             if not captcha:
                 captcha = 'fail'
@@ -259,17 +259,17 @@ def entries_new():
 
 @bp.errorhandler(404)
 def not_found(_):
-    return render_template('app/404.jinja2', **base_data(request))
+    return render_template('errors/404.jinja2', **base_data(request))
 
 
 @bp.errorhandler(403)
 def forbidden(_):
-    return render_template('app/403.jinja2', **base_data(request))
+    return render_template('errors/403.jinja2', **base_data(request))
 
 
 @bp.errorhandler(ValidationError)
 def validation_error(e):
-    return render_template('app/403.jinja2', info=str(e), **base_data(request))
+    return render_template('errors/403.jinja2', info=str(e), **base_data(request))
 
 
 @bp.route('/app/entry/<_id>/view')
@@ -282,7 +282,7 @@ def entry_view(_id):
     if entry is None or entry.author_id != request.user.id:
         return abort(404)
 
-    return render_template('app/entry_view.jinja2', **base_data(request),
+    return render_template('app/entry/view.jinja2', **base_data(request),
                            entry_html=markdown(entry.content), entry=entry)
 
 
@@ -302,7 +302,7 @@ def entry_edit(_id):
         entry.tags = request.form.get('tags', '').split(',')
         return redirect('/app/entry/{}/view'.format(_id), 302)
 
-    return render_template('app/entry_edit.jinja2', **base_data(request), entry=entry)
+    return render_template('app/entry/edit.jinja2', **base_data(request), entry=entry)
 
 
 @bp.route('/app/entry/<_id>/delete', methods=['GET', 'POST'])
@@ -319,7 +319,7 @@ def entry_delete(_id):
         entry.delete()
         return redirect('/app/entries', 302)
 
-    return render_template('app/entry_delete.jinja2', **base_data(request), entry=entry)
+    return render_template('app/entry/delete.jinja2', **base_data(request), entry=entry)
 
 
 @bp.route('/app/admin')

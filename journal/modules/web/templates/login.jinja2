@@ -1,6 +1,9 @@
 {% extends "main.jinja2" %}
 {% block body %}
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    {% if app.recaptcha_enabled %}
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    {% endif %}
+
     <div class="centered">
         <h2>Pandentia's Journal</h2>
         <h3>Log in or sign up</h3>
@@ -18,7 +21,7 @@
                 <input type="password" class="form-control" name="password" placeholder="spaceRoadst3r">
             </div>
 
-            {% if not app.debug %}
+            {% if app.recaptcha_enabled %}
                 <div class="form-group">
                     <label>Captcha</label>
                     <div class="g-recaptcha" data-sitekey="{{ request.recaptcha['site'] }}" data-callback="submit_form"
@@ -33,17 +36,19 @@
             <small class="text-muted">By logging in you agree to the <a href="terms">terms</a>.</small>
             {% include 'csrf.jinja2' %}
         </form>
-        <!--suppress JSUnusedLocalSymbols -->
-        <script>
-            let btn = document.getElementById("submit");
-            let captcha = document.getElementById('recaptcha');
-            if (captcha !== null) {
-                btn.style.display = 'none';
+        {% if app.recaptcha_enabled %}
+            <!--suppress JSUnusedLocalSymbols -->
+            <script>
+                let btn = document.getElementById("submit");
+                let captcha = document.getElementById('recaptcha');
+                if (captcha !== null) {
+                    btn.style.display = 'none';
 
-                function submit_form() {
-                    btn.children[0].click();
+                    function submit_form() {
+                        btn.children[0].click();
+                    }
                 }
-            }
-        </script>
+            </script>
+        {% endif %}
     </div>
 {% endblock %}

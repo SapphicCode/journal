@@ -7,18 +7,23 @@ from journal.modules import web
 
 
 def create_app(**settings) -> Flask:
+    recaptcha_enabled = settings.get('recaptcha_enabled', True)
+
     db = DatabaseInterface(
         settings['mongodb_uri'], settings['mongodb_db'], settings['idgen_worker_id'], settings['secret_key']
     )
 
     app = Flask(__name__, static_folder=None)
+
+    app.recaptcha_enabled = recaptcha_enabled
+
     app.register_blueprint(web.bp)
 
     @app.before_request
     def setup():
         request.db = db
-        request.recaptcha = {'secret': settings['recaptcha_secret'], 'site': settings['recaptcha_site']}
-        return
+        if recaptcha_enabled:
+            request.recaptcha = {'secret': settings['recaptcha_secret'], 'site': settings['recaptcha_site']}
 
     return app
 
@@ -31,6 +36,7 @@ def create_app_from_config_file(path='config.yml'):
         mongodb_uri=data.get('mongodb_uri', 'mongodb://localhost'),
         recaptcha_secret=data.get('recaptcha_secret', '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'),
         recaptcha_site=data.get('recaptcha_site', '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'),
+        recaptcha_enabled=data.get('recaptcha_enabled', True),
         secret_key=data['secret_key'],
     )
     return app
