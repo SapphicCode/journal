@@ -48,6 +48,9 @@ You may also wish to prepare for the upcoming settings, also listed with their
 defaults:
 ```yml
 redis_uri: 'redis://localhost/0'
+
+postgres_uri: 'postgres://localhost'
+postgres_schema: 'public'
 ```
 
 # Installation
