@@ -8,3 +8,4 @@ pymongo
 autoslot
 pyyaml
 pyjwt
+flask_limiter
