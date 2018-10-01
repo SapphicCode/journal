@@ -1,6 +1,6 @@
 {% extends "main.jinja2" %}
 {% block body %}
-    {% if app.recaptcha_enabled %}
+    {% if recaptcha.is_enabled() %}
         <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     {% endif %}
 
@@ -21,10 +21,10 @@
                 <input type="password" class="form-control" name="password" placeholder="spaceRoadst3r">
             </div>
 
-            {% if app.recaptcha_enabled %}
+            {% if recaptcha.is_enabled() %}
                 <div class="form-group">
                     <label>Captcha</label>
-                    <div class="g-recaptcha" data-sitekey="{{ request.recaptcha['site'] }}" data-callback="submit_form"
+                    <div class="g-recaptcha" data-sitekey="{{ recaptcha.get_site_key() }}" data-callback="submit_form"
                          id="recaptcha"></div>
                 </div>
             {% endif %}
@@ -36,7 +36,7 @@
             <small class="text-muted">By logging in you agree to the <a href="terms">terms</a>.</small>
             {% include 'csrf.jinja2' %}
         </form>
-        {% if app.recaptcha_enabled %}
+        {% if recaptcha.is_enabled() %}
             <!--suppress JSUnusedLocalSymbols -->
             <script>
                 let btn = document.getElementById("submit");
