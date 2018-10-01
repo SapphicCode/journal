@@ -3,7 +3,7 @@ from flask import Flask, request
 
 from journal.db import DatabaseInterface
 from journal.db.util import JWTEncoder
-from journal.modules import web
+from journal.modules import web, api
 
 
 def create_app(**settings) -> Flask:
@@ -22,6 +22,15 @@ def create_app(**settings) -> Flask:
         app.recaptcha = {'secret': settings['recaptcha_secret'], 'site': settings['recaptcha_site']}
 
     app.register_blueprint(web.bp)
+    app.register_blueprint(api.bp)
+
+    @app.errorhandler(404)
+    @app.errorhandler(405)
+    def escaped_error(e):
+        if request.full_path.startswith(api.bp.url_prefix + '/'):
+            return api.error(e)
+
+        return e
 
     return app
 

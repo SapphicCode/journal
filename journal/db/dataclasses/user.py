@@ -21,7 +21,7 @@ class User(Slots):
         self._pw_hash = data.get('password', b'')
         display_backup = self._username.replace('-', ' ').replace('_', ' ').replace('.', ' ').title()
         self._display_name = data.get('display_name', display_backup)
-        self.tokens = data.get('tokens', [])
+        self.tokens = data.get('tokens', [])  # TODO: remove
         self.flags = data.get('flags', [])
         self._timezone = pytz.timezone(data.get('timezone', 'UTC'))
         self._token_revision = data.get('token_revision', 0)
