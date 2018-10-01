@@ -8,15 +8,14 @@ import typing
 from flask import Blueprint, render_template, request, Request, redirect, abort, Response, current_app
 
 from journal.db import DatabaseInterface, User
+from journal.helpers import recaptcha
 
 bp = Blueprint('web', __name__, url_prefix='', static_folder='static', static_url_path='/static',
                template_folder='templates')
-session = requests.Session()
 
 
 class ExtendedRequest(Request):  # just to make my IDE happy
     db: DatabaseInterface
-    recaptcha: typing.Dict[str, str]
     user: User
 
 
@@ -38,7 +37,7 @@ def base_data(request: ExtendedRequest, **additional):
     # noinspection PyUnresolvedReferences
     data = {
         'request': request, 'active': lambda page: active(request, page), 'b': __builtins__,
-        'csrf': lambda **kwargs: generate_csrf(request, **kwargs), 'app': current_app,
+        'csrf': lambda **kwargs: generate_csrf(request, **kwargs), 'app': current_app, 'recaptcha': recaptcha,
     }
     data.update(additional)
 
@@ -113,18 +112,8 @@ def login():
         if not (username and password):
             return render_template('login.jinja2', **base_data(request), warn='Required fields left empty.')
 
-        if current_app.recaptcha_enabled:
-            captcha = request.form.get('g-recaptcha-response')
-            if not captcha:
-                captcha = 'fail'
-            success = session.post(
-                'https://www.google.com/recaptcha/api/siteverify',
-                data={
-                    'secret': request.recaptcha['secret'],
-                    'response': captcha,
-                }
-            ).json()['success']
-            if not success:
+        if recaptcha.is_enabled():
+            if not recaptcha.validate(request.form.get('g-recaptcha-response')):
                 return render_template('login.jinja2', **base_data(request), warn='reCAPTCHA failed.')
 
         user = request.db.get_user(username=username)
