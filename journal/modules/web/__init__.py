@@ -58,14 +58,14 @@ def base_data(request: ExtendedRequest, **additional):
 def generate_csrf(request: ExtendedRequest, expiry=60 * 60 * 24) -> str:
     expiry = datetime.datetime.now(tz=pytz.UTC) + datetime.timedelta(seconds=expiry)
     audience = str(request.user.id if request.user else None)
-    return request.db.jwt.encode(exp=expiry, aud=audience)
+    return current_app.db.jwt.encode(exp=expiry, aud=audience)
 
 
 def validate_form(request: ExtendedRequest):
     data = request.form.get('csrf', '')
     audience = str(request.user.id if request.user else None)
     try:
-        request.db.jwt.decode(data, audience=audience)
+        current_app.db.jwt.decode(data, audience=audience)
     except (jwt.DecodeError, jwt.InvalidTokenError):
         raise ValidationError('The CSRF token submitted with the form is invalid.')
 
@@ -78,7 +78,7 @@ def root():
 @bp.before_request
 def setup():
     token = request.cookies.get('token')
-    request.user = request.db.get_user(token=token)
+    request.user = current_app.db.get_user(token=token)
 
 
 @bp.before_request
@@ -116,7 +116,7 @@ def login():
             if not recaptcha.validate(request.form.get('g-recaptcha-response')):
                 return render_template('login.jinja2', **base_data(request), warn='reCAPTCHA failed.')
 
-        user = request.db.get_user(username=username)
+        user = current_app.db.get_user(username=username)
         if user:
             if user.check_pw(password):
                 resp.set_cookie('token', user.create_token(),
@@ -126,7 +126,7 @@ def login():
                 return render_template('login.jinja2', **base_data(request), warn='Invalid password. Please try again.')
         else:
             try:
-                user = request.db.create_user(username, password)
+                user = current_app.db.create_user(username, password)
             except AssertionError as e:
                 return render_template('login.jinja2', **base_data(request),
                                        warn='Unable to create account: {}'.format(e))
@@ -242,7 +242,7 @@ def account_delete():
 @bp.route('/app/entries/new')
 @login_required
 def entries_new():
-    e = request.db.create_entry(request.user)
+    e = current_app.db.create_entry(request.user)
     return redirect('/app/entry/{}/edit'.format(e.id), 302)
 
 
@@ -265,7 +265,7 @@ def validation_error(e):
 @login_required
 def entry_view(_id):
     try:
-        entry = request.db.get_entry(int(_id))
+        entry = current_app.db.get_entry(int(_id))
     except ValueError:
         entry = None
     if entry is None or entry.author_id != request.user.id:
@@ -279,7 +279,7 @@ def entry_view(_id):
 @login_required
 def entry_edit(_id):
     try:
-        entry = request.db.get_entry(int(_id))
+        entry = current_app.db.get_entry(int(_id))
     except ValueError:
         entry = None
     if entry is None or entry.author_id != request.user.id:
@@ -298,7 +298,7 @@ def entry_edit(_id):
 @login_required
 def entry_delete(_id):
     try:
-        entry = request.db.get_entry(int(_id))
+        entry = current_app.db.get_entry(int(_id))
     except ValueError:
         entry = None
     if entry is None or entry.author_id != request.user.id:

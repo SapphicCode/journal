@@ -15,15 +15,13 @@ def create_app(**settings) -> Flask:
 
     app = Flask(__name__, static_folder=None)
 
+    app.db = db
+
     app.recaptcha_enabled = recaptcha_enabled
     if app.recaptcha_enabled:
         app.recaptcha = {'secret': settings['recaptcha_secret'], 'site': settings['recaptcha_site']}
 
     app.register_blueprint(web.bp)
-
-    @app.before_request
-    def setup():
-        request.db = db
 
     return app
 
