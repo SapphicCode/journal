@@ -3,8 +3,6 @@ import functools
 import jwt.exceptions
 import mistune
 import pytz
-import requests
-import typing
 from flask import Blueprint, render_template, request, Request, redirect, abort, Response, current_app
 
 from journal.db import DatabaseInterface, User

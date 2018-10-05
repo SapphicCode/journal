@@ -43,6 +43,7 @@ class Entry(Slots):
 
     @author.setter
     def author(self, value: 'User'):
+        # noinspection PyAttributeOutsideInit
         self.author_id = value.id
 
     @property
@@ -94,7 +95,6 @@ class Entry(Slots):
         """Initializes the database record if necessary."""
         try:
             self.db.entries.insert_one({'_id': self.id})
-            self.timestamp = self._timestamp
             return True
         except pymongo.errors.DuplicateKeyError:
             return False
