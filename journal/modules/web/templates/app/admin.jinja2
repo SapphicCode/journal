@@ -5,11 +5,11 @@
     <ul class="list-group">
         <li class="list-group-item d-flex justify-content-between align-items-center">
             Entries stored
-            <span class="badge badge-primary badge-pill">{{ request.db.entries.count() }}</span>
+            <span class="badge badge-primary badge-pill">{{ request.db.entries.count_documents() }}</span>
         </li>
         <li class="list-group-item d-flex justify-content-between align-items-center">
             Users registered
-            <span class="badge badge-primary badge-pill">{{ request.db.users.count() }}</span>
+            <span class="badge badge-primary badge-pill">{{ request.db.users.count_documents() }}</span>
         </li>
     </ul>
 {% endblock %}
