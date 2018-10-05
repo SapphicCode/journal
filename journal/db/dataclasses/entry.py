@@ -102,5 +102,13 @@ class Entry(Slots):
         res = self.db.entries.delete_one({'_id': self.id})
         assert res.deleted_count == 1
 
+    def can_access(self, user: 'User') -> bool:
+        """Returns whether a user has access to this entry or not."""
+        return self.author_id == user.id  # TODO: sharing feature
+
+    def can_edit(self, user: 'User') -> bool:
+        """Returns whether a user has owner rights on this entry."""
+        return self.author_id == user.id  # (this one can probably stay as-is)
+
     def __repr__(self):
         return '<Entry id={0.id!r} author_id={0.author_id!r} title={0.title!r}>'.format(self)

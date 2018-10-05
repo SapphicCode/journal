@@ -265,7 +265,7 @@ def entry_view(_id):
         entry = current_app.db.get_entry(int(_id))
     except ValueError:
         entry = None
-    if entry is None or entry.author_id != request.user.id:
+    if entry is None or not entry.can_access(request.user):
         return abort(404)
 
     return render_template('app/entry/view.jinja2', **base_data(request),
@@ -279,7 +279,7 @@ def entry_edit(_id):
         entry = current_app.db.get_entry(int(_id))
     except ValueError:
         entry = None
-    if entry is None or entry.author_id != request.user.id:
+    if entry is None or not entry.can_edit(request.user):
         return abort(404)
 
     if request.method == 'POST':
@@ -299,7 +299,7 @@ def entry_delete(_id):
         entry = current_app.db.get_entry(int(_id))
     except ValueError:
         entry = None
-    if entry is None or entry.author_id != request.user.id:
+    if entry is None or not entry.can_edit(request.user):
         return abort(404)
 
     if request.method == 'POST':

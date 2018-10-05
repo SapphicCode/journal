@@ -153,7 +153,7 @@ def entry(id):
         raise UserException('ID given is not an integer.')
 
     entry = current_app.db.get_entry(id)
-    if not entry or entry.author_id != request.user.id:
+    if not entry or not entry.can_access(request.user):
         return abort(404)
 
     return respond(serialize_entry(entry))
