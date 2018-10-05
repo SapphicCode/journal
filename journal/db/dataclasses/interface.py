@@ -78,10 +78,7 @@ class DatabaseInterface:
         return User(self, **data)
 
     def create_entry(self, user: User) -> Entry:
-        e = Entry(self, _id=self.id_gen.generate(), timezone=str(user.timezone))
-        assert e.new(), 'Entry ID generated already exists in the database.'
-        e.author = user
-        return e
+        return Entry(self, timezone=user.timezone.zone, author_id=user.id).new()
 
     def get_entry(self, _id) -> typing.Optional[Entry]:
         entry = self.entries.find_one({'_id': _id})

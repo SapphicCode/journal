@@ -5,7 +5,7 @@ import mistune
 import pytz
 from flask import Blueprint, render_template, request, Request, redirect, abort, Response, current_app
 
-from journal.db import DatabaseInterface, User
+from journal.db import User
 from journal.helpers import recaptcha
 
 bp = Blueprint('web', __name__, url_prefix='', static_folder='static', static_url_path='/static',
@@ -13,7 +13,6 @@ bp = Blueprint('web', __name__, url_prefix='', static_folder='static', static_ur
 
 
 class ExtendedRequest(Request):  # just to make my IDE happy
-    db: DatabaseInterface
     user: User
 
 
@@ -286,7 +285,8 @@ def entry_edit(_id):
     if request.method == 'POST':
         entry.title = request.form.get('title', '')
         entry.content = request.form.get('body', '')
-        entry.tags = request.form.get('tags', '').split(',')
+        entry.tags_human = request.form.get('tags', '')
+        entry.commit()
         return redirect('/app/entry/{}/view'.format(_id), 302)
 
     return render_template('app/entry/edit.jinja2', **base_data(request), entry=entry)
