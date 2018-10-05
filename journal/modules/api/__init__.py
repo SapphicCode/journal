@@ -1,9 +1,6 @@
 import typing
 import functools
-try:
-    import ujson as json
-except ImportError:
-    import json
+import ujson
 
 from flask import Blueprint, Response, current_app, abort, request
 from werkzeug.exceptions import HTTPException
@@ -31,7 +28,7 @@ def verify_fields(data, check: typing.Dict[str, typing.Any], *ignore: str) -> di
             raise UserException('Required field "{}" missing.'.format(k))
         if not isinstance(data[k], v):
             raise UserException('Field "{}" was of type "{}", "{}" expected.'
-                .format(k, type(data[k]).__name__, v.__name__))
+                                .format(k, type(data[k]).__name__, v.__name__))
         verified[k] = data[k]
 
     for k in ignore:
@@ -41,7 +38,7 @@ def verify_fields(data, check: typing.Dict[str, typing.Any], *ignore: str) -> di
     return verified
 
 
-def respond(data: str = None, *, status: int = 200):
+def respond(data: typing.Optional[typing.Union[dict, list]] = None, *, status: int = 200):
     resp = Response()
     if not data:
         status = 204
@@ -50,7 +47,7 @@ def respond(data: str = None, *, status: int = 200):
     if data:
         if not isinstance(data, list) and not isinstance(data, dict):
             data['response'] = data
-        resp.data = json.dumps(data)
+        resp.data = ujson.dumps(data)
         resp.headers = {'Content-Type': 'application/json'}
 
     return resp
@@ -144,6 +141,7 @@ def entries():
     ])
 
 
+# noinspection PyShadowingBuiltins
 @bp.route('/entries/<id>', methods=['GET'])
 @auth_required
 def entry(id):

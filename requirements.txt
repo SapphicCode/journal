@@ -1,3 +1,4 @@
+ujson
 jinja2
 mistune
 requests
