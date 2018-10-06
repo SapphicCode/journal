@@ -18,10 +18,10 @@ class User(Slots):
         self.db = db
         # meta
         self.id = data.get('_id')
-        self._username = data.get('username')
+        self._username = data.get('username') or ''
         self._pw_hash = data.get('password')
         display_backup = self._username.replace('-', ' ').replace('_', ' ').replace('.', ' ').title()
-        self._display_name = data.get('display_name', display_backup)
+        self._display_name = data.get('display_name') or display_backup
         self.flags = data.get('flags', [])
         self._timezone = pytz.timezone(data.get('timezone', 'UTC'))
         # tokens
