@@ -145,10 +145,8 @@ class User(Slots):
         self.commit()
 
     @property
-    def token_expiry(self) -> typing.Optional[datetime.timedelta]:
-        if not self._token_expiry:
-            return
-        return datetime.timedelta(seconds=self._token_expiry)
+    def token_expiry(self) -> int:
+        return self._token_expiry
 
     @token_expiry.setter
     def token_expiry(self, value: int):
@@ -162,7 +160,7 @@ class User(Slots):
     def create_token(self) -> str:
         additional = {}
         if self.token_expiry:
-            additional['exp'] = datetime.datetime.now(tz=pytz.UTC) + self.token_expiry
+            additional['exp'] = datetime.datetime.now(tz=pytz.UTC) + datetime.timedelta(seconds=self.token_expiry)
         return self.db.jwt.encode(uid=self.id, rev=self.token_revision, **additional)
 
     def entries(self, tag=None):
