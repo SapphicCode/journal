@@ -5,7 +5,7 @@ import mistune
 import pytz
 from flask import Blueprint, render_template, request, Request, redirect, abort, Response, current_app
 
-from journal.db import DatabaseInterface, User
+from journal.db import User
 from journal.helpers import recaptcha
 
 bp = Blueprint('web', __name__, url_prefix='', static_folder='static', static_url_path='/static',
@@ -13,7 +13,6 @@ bp = Blueprint('web', __name__, url_prefix='', static_folder='static', static_ur
 
 
 class ExtendedRequest(Request):  # just to make my IDE happy
-    db: DatabaseInterface
     user: User
 
 
@@ -42,8 +41,8 @@ def base_data(request: ExtendedRequest, **additional):
     data['fonts'] = {}
     if request.user:
         data['fonts'] = {
-            'title': request.user.settings.get('title_font'),
-            'body': request.user.settings.get('body_font'),
+            'title': request.user.ui_font_title,
+            'body': request.user.ui_font_body,
         }
     if not data['fonts'].get('title'):
         data['fonts']['title'] = 'Lato'
@@ -184,22 +183,11 @@ def settings():
             new_token_required = True
 
         # personalization
-        dname = request.form.get('display-name')
-        if dname:
-            request.user.display_name = dname
-        theme = request.form.get('theme')
-        if theme in ['light', 'dark']:
-            request.user.settings['theme'] = theme
-        tz = request.form.get('timezone')
-        if tz:
-            try:
-                request.user.timezone = pytz.timezone(tz)
-            except pytz.UnknownTimeZoneError:
-                warn += 'Unknown time zone selected. What are you playing at?\n'
-        new_settings = {
-            'title_font': request.form.get('title-font') or request.user.settings.get('title_font'),
-            'body_font': request.form.get('body-font') or request.user.settings.get('body_font'),
-        }
+        request.user.display_name = request.form.get('display-name')
+        request.user.ui_theme = request.form.get('theme')
+        request.user.timezone = request.form.get('timezone')
+        request.user.ui_font_title = request.form.get('title-font')
+        request.user.ui_font_body = request.form.get('body-font')
         expiry = request.form.get('session-length')
         if expiry:
             try:
@@ -209,23 +197,22 @@ def settings():
                 if 0 < expiry < 3600:  # cleverly dodging 0
                     raise ValueError('A session expiry time under 1 hour is potentially dangerous '
                                      'and could lock you out of your account forever.')
-                request.user.token_expiry = datetime.timedelta(seconds=expiry)
+                request.user.token_expiry = expiry
                 new_token_required = True
             except ValueError as e:
                 warn += f'{e}\n'
             except OverflowError:
                 warn += f'Please pick a smaller session expiry time.'
-        request.user.settings.update(new_settings)
-        request.user.save_setings()
+        request.user.commit()
 
-        r = render_template('app/settings.jinja2', **base_data(request), settings=request.user.settings,
-                            notice='Settings saved.', warn=warn.strip(), **additional)
+        r = render_template('app/settings.jinja2', **base_data(request), notice='Settings saved.', warn=warn.strip(),
+                            **additional)
         r = Response(r)
         if new_token_required:
             r.set_cookie('token', request.user.create_token(),
                          expires=datetime.datetime.now(tz=pytz.UTC) + datetime.timedelta(days=365))
         return r
-    return render_template('app/settings.jinja2', **base_data(request), **additional, settings=request.user.settings)
+    return render_template('app/settings.jinja2', **base_data(request), **additional)
 
 
 @bp.route('/app/settings/delete-account', methods=['GET', 'POST'])
@@ -266,7 +253,7 @@ def entry_view(_id):
         entry = current_app.db.get_entry(int(_id))
     except ValueError:
         entry = None
-    if entry is None or entry.author_id != request.user.id:
+    if entry is None or not entry.can_access(request.user):
         return abort(404)
 
     return render_template('app/entry/view.jinja2', **base_data(request),
@@ -280,13 +267,14 @@ def entry_edit(_id):
         entry = current_app.db.get_entry(int(_id))
     except ValueError:
         entry = None
-    if entry is None or entry.author_id != request.user.id:
+    if entry is None or not entry.can_edit(request.user):
         return abort(404)
 
     if request.method == 'POST':
         entry.title = request.form.get('title', '')
         entry.content = request.form.get('body', '')
-        entry.tags = request.form.get('tags', '').split(',')
+        entry.tags_human = request.form.get('tags', '')
+        entry.commit()
         return redirect('/app/entry/{}/view'.format(_id), 302)
 
     return render_template('app/entry/edit.jinja2', **base_data(request), entry=entry)
@@ -299,7 +287,7 @@ def entry_delete(_id):
         entry = current_app.db.get_entry(int(_id))
     except ValueError:
         entry = None
-    if entry is None or entry.author_id != request.user.id:
+    if entry is None or not entry.can_edit(request.user):
         return abort(404)
 
     if request.method == 'POST':

@@ -28,7 +28,7 @@ class DatabaseInterface:
         self.id_gen = IDGenerator(int(worker_id))
         self.jwt = JWTEncoder(signing_key)
 
-    def create_user(self, username: str, password: str) -> typing.Optional[User]:
+    def create_user(self, username: str, password: str) -> User:
         _id = self.id_gen.generate()
         self.users.insert_one({'_id': _id})
 
@@ -44,13 +44,11 @@ class DatabaseInterface:
         return new
 
     # noinspection PyShadowingBuiltins
-    def get_user(self, *, id=None, username=None, email=None, token=None) -> typing.Optional[User]:
+    def get_user(self, *, id=None, username=None, token=None) -> typing.Optional[User]:
         data = None
 
         if username:
             data = self.users.find_one({'username': username.lower()})
-        if email:
-            data = self.users.find_one({'email': email})
         if id:
             data = self.users.find_one({'_id': id})
         if token:  # ! special case
@@ -64,7 +62,7 @@ class DatabaseInterface:
             user = self.get_user(id=token_data['uid'])
             if not user:  # might happen, user could've deleted their account
                 return
-            if user.token_revision != token_data['rev']:
+            if user.token_revision != token_data['rev']:  # invalidate old tokens
                 return
             return user
 
@@ -78,10 +76,7 @@ class DatabaseInterface:
         return User(self, **data)
 
     def create_entry(self, user: User) -> Entry:
-        e = Entry(self, _id=self.id_gen.generate(), timezone=str(user.timezone))
-        assert e.new(), 'Entry ID generated already exists in the database.'
-        e.author = user
-        return e
+        return Entry(self, timezone=user.timezone.zone, author_id=user.id).new()
 
     def get_entry(self, _id) -> typing.Optional[Entry]:
         entry = self.entries.find_one({'_id': _id})
