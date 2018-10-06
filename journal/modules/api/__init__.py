@@ -6,7 +6,6 @@ from flask import Blueprint, Response, current_app, abort, request
 from werkzeug.exceptions import HTTPException
 
 from journal.helpers import recaptcha
-from journal.db.dataclasses import User, Entry
 
 
 bp = Blueprint(name='api', import_name=__name__, url_prefix='/api')
@@ -51,30 +50,6 @@ def respond(data: typing.Optional[typing.Union[dict, list]] = None, *, status: i
         resp.headers = {'Content-Type': 'application/json'}
 
     return resp
-
-
-def serialize_user(user: User) -> dict:
-    return {
-        'id': user.id,
-        'username': user.username,
-        'display_name': user.display_name,
-        'flags': user.flags,
-        'timezone': user.timezone.zone,
-        'token_revision': user.token_revision,
-        'token_expiry': user.token_expiry,
-        'settings': user.settings,
-    }
-
-
-def serialize_entry(entry: Entry) -> dict:
-    return {
-        'id': entry.id,
-        'author_id': entry.author_id,
-        'title': entry.title,
-        'content': entry.content,
-        'tags': entry.tags,
-        'timestamp': entry.timestamp.isoformat(),
-    }
 
 
 @bp.before_request
@@ -129,7 +104,7 @@ def login():
 @bp.route('/users/@me', methods=['GET'])
 @auth_required
 def me():
-    return respond(serialize_user(request.user))
+    return respond(request.user.to_json())
 
 
 @bp.route('/entries', methods=['GET'])
@@ -156,4 +131,4 @@ def entry(id):
     if not entry or not entry.can_access(request.user):
         return abort(404)
 
-    return respond(serialize_entry(entry))
+    return respond(entry.to_json())
