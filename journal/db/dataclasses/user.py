@@ -46,6 +46,7 @@ class User(Slots):
 
     def serialize(self) -> typing.Dict[str, typing.AnyStr]:
         return {
+            '_id': self.id,
             'username': self.username,
             'password': self._pw_hash,  # I can't believe people still fail to properly store passwords
             'display_name': self._display_name,

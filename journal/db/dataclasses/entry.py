@@ -33,6 +33,11 @@ class Entry(Slots):
             'timezone': (self.timestamp.tzinfo or pytz.UTC).zone,
         }
 
+    def to_json(self) -> dict:
+        data = self.serialize()
+        data['timestamp'] = data['timestamp'].isoformat()
+        return data
+
     def commit(self) -> pymongo.results.UpdateResult:
         res = self.db.entries.replace_one({'_id': self.id}, self.serialize())
         assert res.matched_count == 1
