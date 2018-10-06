@@ -181,6 +181,10 @@ def settings():
         if request.form.get('password'):
             request.user.password = request.form.get('password')
             new_token_required = True
+        if request.form.get('session-invalidation'):
+            request.user.invalidate_tokens()
+            new_token_required = True
+            warn += 'All other sessions have been logged out.\n'
 
         # personalization
         request.user.display_name = request.form.get('display-name')
@@ -221,7 +225,7 @@ def account_delete():
     if request.method == 'POST':
         request.user.delete()
         return redirect('/', 302)
-    return render_template('app/account_delete.jinja2', **base_data(request))
+    return render_template('app/settings/account_delete.jinja2', **base_data(request))
 
 
 @bp.route('/app/entries/new')
