@@ -44,7 +44,14 @@
             </small>
         </div>
 
-        <label>Account deletion (aka GDPR compliance)</label><br>
+        <div class="form-check">
+            <input id="session-invalidation" name="session-invalidation" class="form-check-input" type="checkbox">
+            <label class="form-check-label">Invalidate sessions on other devices.</label>
+            <small class="text-muted">If you think your account may be compromised, ticking this will log out other
+                sessions.</small>
+        </div>
+
+        <label>Account deletion</label><br>
         <a href="settings/delete-account" class="btn btn-outline-danger mb-2">Delete my account</a>
 
         <h3>Personalization</h3>
