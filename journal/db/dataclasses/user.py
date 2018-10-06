@@ -16,20 +16,58 @@ if typing.TYPE_CHECKING:
 class User(Slots):
     def __init__(self, db: 'DatabaseInterface' = None, **data):
         self.db = db
+        # meta
         self.id = data.get('_id')
-        self._username = data.get('username', '')
-        self._pw_hash = data.get('password', b'')
+        self._username = data.get('username')
+        self._pw_hash = data.get('password')
         display_backup = self._username.replace('-', ' ').replace('_', ' ').replace('.', ' ').title()
         self._display_name = data.get('display_name', display_backup)
-        self.tokens = data.get('tokens', [])  # TODO: remove
         self.flags = data.get('flags', [])
         self._timezone = pytz.timezone(data.get('timezone', 'UTC'))
-        self._token_revision = data.get('token_revision', 0)
-        self._token_expiry = data.get('token_expiry')
-        self.settings = data.get('settings', {})
+        # tokens
+        self._token_revision = data.get('token_revision') or 0
+        self._token_expiry = data.get('token_expiry') or 0
+        # UI
+        self._ui_theme = data.get('ui_theme') or 'light'
+        self._ui_font_title = data.get('ui_font_title') or 'Lato'
+        self._ui_font_body = data.get('ui_font_body') or 'Open Sans'
+
+        settings = data.get('settings', {})
+        if settings:
+            if 'title_font' in settings:
+                self._ui_font_title = settings['title_font']
+            if 'body_font' in settings:
+                self._ui_font_body = settings['body_font']
+            if 'theme' in settings:
+                self._ui_theme = settings['theme']
 
     def __repr__(self):
         return '<User username={0.username!r} display_name={0.display_name!r}>'.format(self)
+
+    def serialize(self) -> typing.Dict[str, typing.AnyStr]:
+        return {
+            'username': self.username,
+            'password': self._pw_hash,  # I can't believe people still fail to properly store passwords
+            'display_name': self._display_name,
+            'flags': self.flags,
+            'timezone': self._timezone.zone,
+            'token_revision': self.token_revision,
+            'ui_theme': self._ui_theme,
+            'ui_font_title': self._ui_font_title,
+            'ui_font_body': self._ui_font_body,
+        }
+
+    def to_json(self) -> dict:
+        """Returns a JSON-compatible dictionary."""
+        data = self.serialize()
+        del data['password']  # even though it's hashed, let's not leak it
+        del data['token_revision']  # not really interesting to the user or developers
+        return data
+
+    def commit(self) -> pymongo.results.UpdateResult:
+        res = self.db.users.replace_one({'_id': self.id}, self.serialize())
+        assert res.matched_count == 1
+        return res
 
     def check_pw(self, password: str):
         try:
@@ -38,31 +76,26 @@ class User(Slots):
         except argon2.exceptions.VerificationError:
             return False
 
-    def _update(self, **fields) -> pymongo.results.UpdateResult:
-        res = self.db.users.update_one({'_id': self.id}, {'$set': fields})
-        assert res.matched_count == 1
-        return res
-
-    def _increment(self, **fields):
-        res = self.db.users.update_one({'_id': self.id}, {'$inc': fields})
-        assert res.modified_count == 1  # we're assuming it actually was incremented
-        return res
-
     @property
     def username(self):
         return self._username
 
     @username.setter
-    def username(self, value):
+    def username(self, value: typing.Optional[str]):
+        if not value or not value.strip() or value.strip() == self.username:
+            return  # our work here is done
+
         value = value.strip().lower()
-        assert value, 'Unable to set username: Username is empty.'
+
         for char in value:
             if char not in 'abcdefghijklmnopqrstuvwxyz0123456789-_.':
                 raise AssertionError('Unable to set username: Illegal characters.')
+        old_username = self.username
         try:
-            self._update(username=value)
             self._username = value
+            self.commit()
         except pymongo.errors.DuplicateKeyError:
+            self._username = old_username
             raise AssertionError('Unable to set username: Username is taken.')
 
     @property
@@ -71,8 +104,9 @@ class User(Slots):
 
     @display_name.setter
     def display_name(self, value):
-        self._display_name = value
-        self._update(display_name=self._display_name)
+        if not value or not value.strip():
+            return
+        self._display_name = value.strip()
 
     @property
     def password(self):
@@ -80,11 +114,14 @@ class User(Slots):
 
     @password.setter
     def password(self, value):
+        if not value or not value.strip():
+            return
+
         password = self.db.argon2.hash(value)
         del value  # get that thing out of memory ASAP
         self._pw_hash = password
-        self._update(password=password)
         self.invalidate_tokens()
+        self.commit()
 
     @property
     def timezone(self):
@@ -92,16 +129,19 @@ class User(Slots):
 
     @timezone.setter
     def timezone(self, value):
-        self._timezone = value
-        self._update(timezone=value.zone)
+        if not value:
+            return
+        if value not in pytz.all_timezones:
+            raise AssertionError('Invalid timezone given.')
+        self._timezone = pytz.timezone(value)
 
     @property
-    def token_revision(self) -> int:
+    def token_revision(self) -> int:  # not making a setter for this, making one would be a Bad Idea(tm)
         return self._token_revision
 
     def invalidate_tokens(self):
         self._token_revision += 1  # state-keeping the best we can
-        self._increment(token_revision=1)
+        self.commit()
 
     @property
     def token_expiry(self) -> typing.Optional[datetime.timedelta]:
@@ -110,13 +150,13 @@ class User(Slots):
         return datetime.timedelta(seconds=self._token_expiry)
 
     @token_expiry.setter
-    def token_expiry(self, value: typing.Optional[datetime.timedelta]):
-        if value is not None:
-            value = int(value.total_seconds())
-            value = value if value != 0 else None
+    def token_expiry(self, value: int):
+        if not value:
+            return
+        if value < 0:
+            raise AssertionError('Cannot set a negative value for expiry.')
         self._token_expiry = value
-        self._update(token_expiry=value)
-        self.invalidate_tokens()
+        self.invalidate_tokens()  # this commits for us
 
     def create_token(self) -> str:
         additional = {}
@@ -135,11 +175,47 @@ class User(Slots):
         for raw_entry in cursor:
             yield Entry(self.db, **raw_entry)
 
-    def save_setings(self):
-        self._update(settings=self.settings)
+    @property
+    def ui_theme(self):
+        return self._ui_theme
 
-    def save_flags(self):
-        self._update(flags=self.flags)
+    @ui_theme.setter
+    def ui_theme(self, value: str):
+        if not value:
+            return
+        if value not in ['light', 'dark']:
+            raise AttributeError('Invalid theme set.')
+        self._ui_theme = value
+
+    @staticmethod
+    def _validate_font(value):
+        for c in value:
+            if c.lower() not in 'abcdefghijklmnopqrstuvwxyz ':
+                raise AssertionError('Invalid font given.')
+
+    @property
+    def ui_font_title(self):
+        return self._ui_font_title
+
+    @ui_font_title.setter
+    def ui_font_title(self, value):
+        if not value or not value.strip():  # sacrificing speed for readability, oh well
+            return
+        value = value.strip()
+        self._validate_font(value)
+        self._ui_font_title = value
+
+    @property
+    def ui_font_body(self):
+        return self._ui_font_body
+
+    @ui_font_body.setter
+    def ui_font_body(self, value):
+        if not value or not value.strip():  # sacrificing speed for readability, oh well
+            return
+        value = value.strip()
+        self._validate_font(value)
+        self._ui_font_body = value
 
     def delete(self):
         self.db.users.delete_one({'_id': self.id})

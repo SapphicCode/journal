@@ -93,7 +93,7 @@ class Entry(Slots):
         self.tags = tag_string.split(',')
 
     def new(self) -> 'Entry':
-        """Initializes the database record."""
+        """Initializes the database record and returns itself."""
         self.db.entries.insert_one(self.serialize())
         return self
 

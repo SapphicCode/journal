@@ -36,7 +36,7 @@
         <div class="form-group">
             <label for="session-length">Session Length</label>
             <input id="session-length" name="session-length" class="form-control" type="number"
-                   placeholder="{{ b.int(request.user.token_expiry.total_seconds()) if request.user.token_expiry else "0" }}">
+                   placeholder="{{ request.user.token_expiry }}">
             <small class="text-muted">
                 This is the maximum amount of time (in seconds) that a session can last for before it will be logged
                 out. <code>0</code> disables this functionality.<br>
@@ -77,10 +77,10 @@
 
         <div class="form-group">
             <input id="theme-light" name="theme" type="radio"
-                   value="light" {{ 'checked' if settings.get('theme') == 'light' or not settings.get('theme') }}>
+                   value="light" {{ 'checked' if request.user.ui_theme == 'light' }}>
             <label for="theme-light">Light</label><br>
             <input id="theme-dark" name="theme" type="radio"
-                   value="dark" {{ 'checked' if settings.get('theme') == 'dark' }}>
+                   value="dark" {{ 'checked' if request.user.ui_theme == 'dark' }}>
             <label for="theme-dark">Dark</label>
         </div>
 
